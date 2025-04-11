@@ -1,5 +1,35 @@
 <script>
-</script>
+	import { onMount } from 'svelte';
+	
+  
+	onMount(() => {
+	  if (typeof Swiper !== "undefined") {
+		new Swiper("#deal-product", {
+		  slidesPerView: 1,
+		  spaceBetween: 20,
+		  pagination: {
+			el: ".swiper-pagination",
+			clickable: true,
+		  },
+		  navigation: {
+			nextEl: ".swiper-button-next",
+			prevEl: ".swiper-button-prev",
+		  },
+		  breakpoints: {
+			640: { slidesPerView: 2 },
+		  },
+		});
+	  } else {
+		console.error("Swiper is not loaded. Check your script link in app.html.");
+	  }
+	});
+  </script>
+  
+  <style>
+	.single-product-wrap{
+		padding-bottom: 2rem;
+	}
+  </style>
 
 <footer>
 	<div class="footer-top-area section-ptb">

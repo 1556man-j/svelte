@@ -42,7 +42,7 @@
               <span class="cart-icon"
                 ><i class="feather-shopping-bag"></i
               ></span>
-              <span class="cart-counter" id="bottom-counters">9</span>
+              <span class="cart-counter" id="bottom-counters">0</span>
               <span class="header-title">Cart</span>
             </a>
           </div>

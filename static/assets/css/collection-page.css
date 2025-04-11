@@ -384,10 +384,14 @@
         width: calc(100% - 30px)
     }
 }
-
+@media (min-width: 991px) {
+    .shop-product-wrap.grid-1 ul.product-view li.st-col-item {
+        width: calc(100% - 30px)
+    }
+}
 @media (max-width: 767px) {
     .shop-product-wrap.grid-1 ul.product-view li.st-col-item {
-        width: calc(50% - 12px)
+        width: calc(100% - 12px)
     }
 }
 

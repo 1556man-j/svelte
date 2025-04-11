@@ -40,7 +40,7 @@ function updateCartDisplay() {
     cartItem.innerHTML = `
       <!-- cart-img start -->
       <div class="item-img">
-        <a href="/product-template">
+        <a href="product-template.html">
           <img src="${item.image}" class="img-fluid" alt="${item.name}" />
         </a>
       </div>
@@ -48,13 +48,13 @@ function updateCartDisplay() {
 
       <!-- cart-title start -->
       <div class="item-title">
-        <a href="/product-template">${item.name}</a>
+        <a href="product-template.html">${item.name}</a>
         <span class="item-option">
           <span class="pro-variant-title">Quantity:</span>
           <span class="pro-variant-type">${item.quantity}</span>
         </span>
         <span class="item-option">
-          <span class="item-price">$${item.price}</span>
+          <span class="item-price">€${item.price}</span>
         </span>
       </div>
       <!-- cart-title end -->
@@ -90,13 +90,13 @@ function updateCartDisplay() {
     // Add price details
     const priceDetails = document.createElement("li");
     priceDetails.classList.add("item-price");
-    priceDetails.innerHTML = `<span class="amount full-price">$${itemTotalPrice.toFixed(2)}</span>`;
+    priceDetails.innerHTML = `<span class="amount full-price">€${itemTotalPrice.toFixed(2)}</span>`;
     cartItemsContainer.appendChild(priceDetails);
   });
 
   // Update subtotal
   if (subtotalPriceElement) {
-    subtotalPriceElement.textContent = `$${subtotal.toFixed(2)}`;
+    subtotalPriceElement.textContent = `€${subtotal.toFixed(2)}`;
   }
 
   // Add event listeners for quantity adjustment and removal

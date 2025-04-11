@@ -1,4 +1,115 @@
 <script>
+	import { onMount } from 'svelte';
+
+	onMount(() => {
+		// Wait until DOM is ready before running the JS
+		const checkDOM = setInterval(() => {
+			const exists = document.querySelector('.product-title h2');
+			if (exists && window.loadProductData) {
+				clearInterval(checkDOM);
+				window.loadProductData(); // Run the function from your external JS
+				sortProducts(sortBy);
+			
+			}
+		}, 100);
+
+		if (window.jQuery) {
+			jQuery('#insta-slider').owlCarousel({
+				loop: true,
+				margin: 30,
+				nav: true,
+				dots: true,
+				autoplay: true,
+				autoplayTimeout: 3000,
+				responsive: {
+					0: {
+						items: 2
+					},
+					479: {
+						items: 3
+					},
+					979: {
+						items: 4
+					},
+					1199: {
+						items: 5
+					}
+				}
+			});
+		} else {
+			console.error("jQuery not found! Make sure it's loaded before initializing Owl Carousel.");
+		}
+
+		
+	});
+
+	// Initialize the selected sort value and view mode
+	let sortBy = 'manual';
+  let selectedSortLabel = 'Featured';
+  let gridView = 3; // 3 for grid view, 1 for list view
+
+  // Sort options map
+  const criteriaMap = {
+    'Featured': 'manual',
+    'Best Selling': 'best-selling',
+    'Alphabetically, A-Z': 'title-ascending',
+    'Alphabetically, Z-A': 'title-descending',
+    'Price, low to high': 'price-ascending',
+    'Price, high to low': 'price-descending',
+  };
+
+  // Function to handle sorting changes
+  const handleSortChange = (value) => {
+    selectedSortLabel = Object.keys(criteriaMap).find(key => criteriaMap[key] === value);
+    sortProducts(value);
+  };
+
+  // Function to handle sorting of the product list
+  const sortProducts = (option) => {
+    const productList = document.querySelectorAll('.st-col-item'); // Static products list
+    const productArray = Array.from(productList);
+
+    if (option === 'price-ascending') {
+      productArray.sort((a, b) => {
+        const priceA = parseFloat(a.querySelector('.new-price').innerText.replace('€', ''));
+        const priceB = parseFloat(b.querySelector('.new-price').innerText.replace('€', ''));
+        return priceA - priceB;
+      });
+    } else if (option === 'price-descending') {
+      productArray.sort((a, b) => {
+        const priceA = parseFloat(a.querySelector('.new-price').innerText.replace('€', ''));
+        const priceB = parseFloat(b.querySelector('.new-price').innerText.replace('€', ''));
+        return priceB - priceA;
+      });
+    } else if (option === 'title-ascending') {
+      productArray.sort((a, b) => {
+        const nameA = a.querySelector('h6 a').innerText.toLowerCase();
+        const nameB = b.querySelector('h6 a').innerText.toLowerCase();
+        return nameA.localeCompare(nameB);
+      });
+    } else if (option === 'title-descending') {
+      productArray.sort((a, b) => {
+        const nameA = a.querySelector('h6 a').innerText.toLowerCase();
+        const nameB = b.querySelector('h6 a').innerText.toLowerCase();
+        return nameB.localeCompare(nameA);
+      });
+    }
+
+    // Reattach the sorted products to the container
+    const productContainer = document.getElementById('product-grid');
+    productArray.forEach(product => productContainer.appendChild(product));
+  };
+
+  // Function to change the grid view (1 = list view, 3 = grid view)
+  const changeGridView = (viewMode) => {
+    gridView = viewMode;
+  };
+  //  Fix for desktop dropdown list sorting
+  const handleListClick = (label) => {
+    selectedSortLabel = label;
+    sortBy = criteriaMap[label];
+    handleSortChange(sortBy); // Triggers sorting
+  };
 </script>
 
 <!-- main section start-->
@@ -53,89 +164,74 @@
 							<!-- shop-top-bar start -->
 							<div class="shop-top-bar collection">
 								<div class="product-filter without-sidebar">
-								  <button class="filter-button" type="button">
-									<i class="feather-filter"></i><span>Filter</span>
-								  </button>
+									<button class="filter-button" type="button">
+										<i class="feather-filter"></i><span>Filter</span>
+									</button>
 								</div>
 								<div class="product-view-mode">
-								  <!-- shop-item-filter-list start -->
-								  <a
-									href="javascript:void(0)"
-									class="list-change-view grid-three active"
-									data-grid-view="3"
-									><i class="feather-grid"></i
-								  ></a>
-								  <a
-									href="javascript:void(0)"
-									data-grid-view="1"
-									class="list-change-view list-one"
-									><i class="feather-list"></i
-								  ></a>
-								  <!-- shop-item-filter-list end -->
+									<!-- shop-item-filter-list start -->
+									<a
+										href="javascript:void(0)"
+										class="list-change-view grid-three {gridView === 3 ? 'active' : ''}"
+										data-grid-view="3"
+										on:click={() => changeGridView(3)}
+									>
+										<i class="feather-grid"></i>
+									</a>
+
+									<a
+										href="javascript:void(0)"
+										class="list-change-view list-one {gridView === 1 ? 'active' : ''}"
+										data-grid-view="1"
+										on:click={() => changeGridView(1)}
+									>
+										<i class="feather-list"></i>
+									</a>
+									<!-- shop-item-filter-list end -->
 								</div>
 								<!-- product-short start -->
 								<div class="product-short">
-								  <label for="SortBy">Sort by:</label>
-								  <select class="nice-select" name="sortby" id="SortBy">
-									<option value="manual">Featured</option>
-									<option value="best-selling">Best Selling</option>
-									<option value="title-ascending">
-									  Alphabetically, A-Z
-									</option>
-									<option value="title-descending">
-									  Alphabetically, Z-A
-									</option>
-									<option value="price-ascending">
-									  Price, low to high
-									</option>
-									<option value="price-descending">
-									  Price, high to low
-									</option>
-								   
-								  </select>
-								  <a href="javascript:void(0)" class="short-title">
-									<span class="sort-title">Best Selling</span>
-									<span class="sort-icon"
-									  ><i class="bi bi-chevron-down"></i
-									></span>
-								  </a>
-								  <a
-									href="javascript:void(0)"
-									class="short-title short-title-lg"
-								  >
-									<span class="sort-title">Best Selling</span>
-									<span class="sort-icon"
-									  ><i class="bi bi-chevron-down"></i
-									></span>
-								  </a>
-								  <ul class="collapse" role="list" id="select-wrap">
-									<li><a href="javascript:void(0)">Featured</a></li>
-									<li class="selected">
-									  <a href="javascript:void(0)">Best Selling</a>
-									</li>
-									<li>
-									  <a href="javascript:void(0)">Alphabetically, A-Z</a>
-									</li>
-									<li>
-									  <a href="javascript:void(0)">Alphabetically, Z-A</a>
-									</li>
-									<li>
-									  <a href="javascript:void(0)">Price, low to high</a>
-									</li>
-									<li>
-									  <a href="javascript:void(0)">Price, high to low</a>
-									</li>
-								   
-								  </ul>
+									<label for="SortBy">Sort by:</label>
+									<select
+										class="nice-select"
+										name="sortby"
+										id="SortBy"
+										bind:value={sortBy}
+										on:change={() => handleSortChange(sortBy)}
+									>
+										<option value="manual">Featured</option>
+										<option value="best-selling">Best Selling</option>
+										<option value="title-ascending"> Alphabetically, A-Z </option>
+										<option value="title-descending"> Alphabetically, Z-A </option>
+										<option value="price-ascending"> Price, low to high </option>
+										<option value="price-descending"> Price, high to low </option>
+									</select>
+									<a href="javascript:void(0)" class="short-title">
+										<span class="sort-title">{selectedSortLabel}</span>
+										<span class="sort-icon"><i class="bi bi-chevron-down"></i></span>
+									</a>
+									<a href="javascript:void(0)" class="short-title short-title-lg">
+										<span class="sort-title">{selectedSortLabel}</span>
+										<span class="sort-icon"><i class="bi bi-chevron-down"></i></span>
+									</a>
+									<ul class="collapse" role="list" id="select-wrap">
+										{#each Object.entries(criteriaMap) as [label, value]}
+											<li class:selected={sortBy === value}>
+												<a href="javascript:void(0)" on:click={() => handleListClick(label)}>
+													{label}
+												</a>
+											</li>
+										{/each}
+									</ul>
 								</div>
 								<!-- product-short end -->
-							  </div>
+							</div>
 							<!-- shop-top-bar end -->
 							<div class="get-data-products">
 								<div class="shop-grid">
 									<div id="ProductGridContainer">
 										<div class="product-grid-view">
-											<div class="shop-product-wrap collection grid-3">
+											<div class="shop-product-wrap collection grid-3 {gridView === 3 ? 'grid-3' : 'grid-1'}">
 												<div class="row">
 													<div class="col">
 														<ul class="product-view" id="product-grid">
@@ -217,8 +313,7 @@
 																		<!-- product-rating end -->
 																		<!-- product-title start -->
 																		<h6>
-																			<a href="/product-template/1">Candy nut chocolate</a
-																			>
+																			<a href="/product-template/1">Candy nut chocolate</a>
 																		</h6>
 																		<!-- product-title end -->
 																		<!-- product-price start -->
@@ -1112,8 +1207,7 @@
 																		<!-- product-rating end -->
 																		<!-- product-title start -->
 																		<h6>
-																			<a href="/product-template/7">Sandwich olka bread</a
-																			>
+																			<a href="/product-template/7">Sandwich olka bread</a>
 																		</h6>
 																		<!-- product-title end -->
 																		<!-- product-price start -->
@@ -1262,8 +1356,7 @@
 																		<!-- product-rating end -->
 																		<!-- product-title start -->
 																		<h6>
-																			<a href="/product-template/8">Healthy cake pastry</a
-																			>
+																			<a href="/product-template/8">Healthy cake pastry</a>
 																		</h6>
 																		<!-- product-title end -->
 																		<!-- product-price start -->
@@ -1404,8 +1497,7 @@
 																		<!-- product-rating end -->
 																		<!-- product-title start -->
 																		<h6>
-																			<a href="/product-template/9">Creamy for rasmalai</a
-																			>
+																			<a href="/product-template/9">Creamy for rasmalai</a>
 																		</h6>
 																		<!-- product-title end -->
 																		<!-- product-price start -->
@@ -1692,9 +1784,7 @@
 																		<!-- product-rating end -->
 																		<!-- product-title start -->
 																		<h6>
-																			<a href="/product-template/11"
-																				>Crackers for rasmalai</a
-																			>
+																			<a href="/product-template/11">Crackers for rasmalai</a>
 																		</h6>
 																		<!-- product-title end -->
 																		<!-- product-price start -->
@@ -1835,9 +1925,7 @@
 																		<!-- product-rating end -->
 																		<!-- product-title start -->
 																		<h6>
-																			<a href="/product-template/12"
-																				>Fresh healthy doughnuts</a
-																			>
+																			<a href="/product-template/12">Fresh healthy doughnuts</a>
 																		</h6>
 																		<!-- product-title end -->
 																		<!-- product-price start -->
@@ -1979,4 +2067,4 @@
 		</div>
 	</section>
 </main>
-<!-- main section end-->
+<!-- main section end--> 

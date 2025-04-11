@@ -1,7 +1,38 @@
 <script>
-  
-</script>
+  import { onMount } from "svelte";
 
+  onMount(() => {
+    if (!window.location.hash.includes("#reloaded")) {
+      // First load — add hash and reload
+      window.location.href = window.location.href + "#reloaded";
+      window.location.reload();
+    }
+
+
+  const scripts = [
+      '/static/assets/js/wishlist.js',
+      '/static/assets/js/wishlist-page.js',
+    ];
+
+    scripts.forEach((src) => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.defer = true;
+      document.body.appendChild(script);
+    });
+    
+    // Wait until the DOM is ready before running the JS
+    const checkDOM = setInterval(() => {
+			const container = document.querySelector(".wishlist-tile-container");
+
+			if (container && typeof window.renderWishlist === "function") {
+				console.log("Running renderWishlist from Svelte...");
+				window.renderWishlist();
+				clearInterval(checkDOM);
+			}
+		}, 100);
+  });
+</script>
 <!-- Main Section Start -->
 <main>
   <!-- Breadcrumb Start -->

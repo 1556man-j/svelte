@@ -1,3 +1,5 @@
+console.log("✅ wishlist-page.js loaded");
+
 document.addEventListener("DOMContentLoaded", function () {
   const wishlistCounterElements = document.querySelectorAll(".wishlist-counter");
   const wishlistContainer = document.querySelector(".wishlist-tile-container");
@@ -131,3 +133,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Initial rendering and count update
   renderWishlist();
 });
+
+console.log("✅ Defining renderWishlist");
+
+window.renderWishlist = renderWishlist;

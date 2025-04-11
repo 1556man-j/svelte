@@ -1,5 +1,9 @@
 <script>
+  import { onMount } from "svelte";
 
+  onMount(() => {
+    console.log("Search component mounted, external script should now work.");
+  });
 </script>
 
  <!-- search-popup start -->

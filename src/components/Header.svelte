@@ -1,5 +1,17 @@
 <script>
   import {goto } from '$app/navigation';
+    import { onMount } from "svelte";
+
+  onMount(() => {
+// Wait until DOM is ready before running the JS
+    const checkDOM = setInterval(() => {
+      const exists = document.querySelector(".product-title h2");
+      if (exists && window.loadProductData) {
+        clearInterval(checkDOM);
+        window.loadProductData(); // Run the function from your external JS
+      }
+    }, 100);
+  })
 </script>
 
 <!-- top-notification start -->
@@ -52,7 +64,7 @@
                     ><i class="feather-heart"></i
                   ></span>
                   <span class="wishlist-title">Wishlist</span>
-                  <span class="wishlist-counter">5</span>
+                  <span class="wishlist-counter">0</span>
                 </a>
               </div>
               <!-- wishlist end -->
@@ -145,7 +157,7 @@
                                   <div class="single-product-wrap">
                                     <div class="product-image">
                                       <a
-                                        href="product-template.html?productId=2"
+                                        href="/product-template/2"
                                         class="pro-img"
                                       >
                                         <img
@@ -162,7 +174,7 @@
                                     </div>
                                     <div class="product-content">
                                       <h6>
-                                        <a href="product-template.html?productId=2"
+                                        <a href="/product-template/2"
                                           >A bakery doughnuts</a
                                         >
                                       </h6>
@@ -183,7 +195,7 @@
                                   <div class="single-product-wrap">
                                     <div class="product-image">
                                       <a
-                                        href="product-template.html?productId=1"
+                                        href="/product-template/1"
                                         class="pro-img"
                                       >
                                         <img
@@ -200,7 +212,7 @@
                                     </div>
                                     <div class="product-content">
                                       <h6>
-                                        <a href="product-template.html?productId=1"
+                                        <a href="/product-template/1"
                                           >Candy nut chocolate</a
                                         >
                                       </h6>
@@ -219,7 +231,7 @@
                             </ul>
                             <div class="menu-product-btn">
                               <a
-                                href="collection.html"
+                                href="/collection"
                                 class="menu-pro-link"
                               >
                                 <span class="menu-title">See more</span>
@@ -238,7 +250,7 @@
                                   <div class="single-product-wrap">
                                     <div class="product-image">
                                       <a
-                                        href="product-template.html?productId=6"
+                                        href="/product-template/6"
                                         class="pro-img"
                                       >
                                         <img
@@ -255,7 +267,7 @@
                                     </div>
                                     <div class="product-content">
                                       <h6>
-                                        <a href="product-template.html?productId=6"
+                                        <a href="/product-template/6"
                                           >The bread a fresh</a
                                         >
                                       </h6>
@@ -276,7 +288,7 @@
                                   <div class="single-product-wrap">
                                     <div class="product-image">
                                       <a
-                                        href="product-template.html?productId=7"
+                                        href="/product-template/7"
                                         class="pro-img"
                                       >
                                         <img
@@ -293,7 +305,7 @@
                                     </div>
                                     <div class="product-content">
                                       <h6>
-                                        <a href="product-template.html?productId=7"
+                                        <a href="/product-template/7"
                                           >Sandwich olka bread</a
                                         >
                                       </h6>
@@ -312,7 +324,7 @@
                             </ul>
                             <div class="menu-product-btn">
                               <a
-                                href="collection.html"
+                                href="/collection"
                                 class="menu-pro-link"
                               >
                                 <span class="menu-title">See more</span>

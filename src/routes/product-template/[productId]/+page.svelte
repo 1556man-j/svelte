@@ -1,6 +1,70 @@
 <script>
+  import { onMount } from "svelte";
+  import { page } from "$app/stores";
 
+  function setupFullscreenButton() {
+    const fullscreenBtn = document.getElementById("fullscreenBtn");
+    const image = document.getElementById("mainProductImage");
+
+    if (fullscreenBtn && image) {
+      fullscreenBtn.addEventListener("click", () => {
+        if (image.requestFullscreen) {
+          image.requestFullscreen();
+        } else if (image.webkitRequestFullscreen) {
+          image.webkitRequestFullscreen(); // Safari
+        } else if (image.msRequestFullscreen) {
+          image.msRequestFullscreen(); // IE11
+        }
+      });
+    }
+  }
+
+  // Function to load product data from external JS
+  function runProductLoaderWhenDOMReady() {
+    const checkDOM = setInterval(() => {
+      const exists = document.querySelector(".product-title h2");
+      if (exists && window.loadProductData) {
+        clearInterval(checkDOM);
+        window.loadProductData();
+
+        setupFullscreenButton(); // 👈 Also setup fullscreen after DOM is ready
+      }
+    }, 100);
+  }
+
+  onMount(() => {
+    runProductLoaderWhenDOMReady();
+
+    if (globalThis.Swiper) {
+      new Swiper("#related-slider", {
+        loop: true,
+        autoplay: {
+          delay: 3000,
+          disableOnInteraction: false,
+        },
+        spaceBetween: 20,
+        slidesPerView: 1,
+        breakpoints: {
+          360: { slidesPerView: 2 },
+          992: { slidesPerView: 3 },
+          1200: { slidesPerView: 4 },
+        },
+        pagination: {
+          el: ".swiper-pagination",
+          clickable: true,
+        },
+        navigation: {
+          nextEl: ".swiper-button-next",
+          prevEl: ".swiper-button-prev",
+        },
+      });
+    }
+  });
+
+  // Watch route changes to reload data and fullscreen
+  $: $page.url.pathname, runProductLoaderWhenDOMReady();
 </script>
+
 
  <!-- main section start-->
  <main>
@@ -18,7 +82,7 @@
               <!-- breadcrumb-list start -->
               <ul class="breadcrumb-list">
                 <li class="breadcrumb-item-link">
-                  <a href="index-2.html">Home</a>
+                  <a href="/">Home</a>
                 </li>
                 <li class="breadcrumb-item-link">
                   <span></span>
@@ -44,11 +108,11 @@
                 <div class="product_detail_img product_detail_img_bottom">
                   <!-- top slick-slider start -->
                   <div class="product_img_top">
-                    <button class="full-view">
-                      <i class="bi bi-arrows-fullscreen"></i>
-                    </button>
-                    <div class="slider-big slick-slider">
-                      <div class="slick-slide">
+                    <button class="full-view" id="fullscreenBtn">
+  <i class="bi bi-arrows-fullscreen"></i>
+</button>
+                    <div class="">
+                      <div class="">
                         <a
                           href=""
                           class="product-single img-link"
@@ -56,7 +120,8 @@
                             <img
                               src=""
                               class="img-fluid product-imag"
-                              alt="p-1"
+                              alt="product"
+    id="mainProductImage"
                             />
                           
                         </a>

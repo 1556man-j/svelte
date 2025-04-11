@@ -1,35 +1,44 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const wishlistButtons = document.querySelectorAll(".wishlist-product");
+  document.body.addEventListener("click", function (e) {
+    const btn = e.target.closest(".wishlist-product");
+    if (!btn) return;
 
-    wishlistButtons.forEach((button) => {
-        button.addEventListener("click", function (event) {
-            event.preventDefault(); // Prevent default link behavior
+    e.preventDefault();
 
-            // Get product data from the button attributes
-            const product = {
-                id: this.dataset.id,
-                name: this.dataset.name,
-                price: this.dataset.price,
-                image: this.dataset.image,
-            };
-            console.log("Adding to wishlist:", product);
+    const id = btn.dataset.id;
+    const name = btn.dataset.name;
+    const price = btn.dataset.price;
+    const image = btn.dataset.image;
 
-            // Retrieve current wishlist from localStorage or create a new one
-            let wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
+    let wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
 
-            // Check if the product is already in the wishlist
-            const exists = wishlist.some((item) => item.id === product.id);
-            if (!exists) {
-                wishlist.push(product); // Add new product to wishlist
-                localStorage.setItem("wishlist", JSON.stringify(wishlist)); // Save updated wishlist
-                
-                alert("Product added to wishlist!"); // Show success message
-            } else {
-                alert("Product is already in the wishlist.");
-            }
-            updateWishlistCount();
+    const exists = wishlist.some((item) => item.id === id);
 
-            // No page reload needed now
+    if (exists) {
+      alert("Item already in wishlist!");
+    } else {
+      wishlist.push({ id, name, price, image });
+      localStorage.setItem("wishlist", JSON.stringify(wishlist));
+      alert("Added to wishlist!");
+
+      // ✅ Update counter if present
+      const counter = document.querySelectorAll(".wishlist-counter");
+      if (counter) {
+        counter.forEach((el) => {
+          el.textContent = wishlist.length;
         });
-    });
+      }
+
+      // ✅ LIVE UPDATE if renderWishlist exists (from wishlist-page.js)
+      if (typeof renderWishlist === "function") {
+        renderWishlist();
+      }
+    }
+  });
 });
+window.dispatchWishlistUpdate = function () {
+  window.dispatchEvent(new StorageEvent("storage", {
+    key: "wishlist",
+    newValue: localStorage.getItem("wishlist")
+  }));
+};

@@ -12,7 +12,7 @@
 	import Totop from '../components/Totop.svelte';
 </script>
 
-<Notification/>
+
 <Minicart/>
 <Search/>
 <Quickview/>
@@ -26,5 +26,6 @@
 <Screenbg/>
 <Mobile/>
 <Totop/>
+<Notification/>
 
 

@@ -1,6 +1,116 @@
 <script>
+  import { onMount } from "svelte";
 
+  onMount(() => {
+// Wait until DOM is ready before running the JS
+    const checkDOM = setInterval(() => {
+      const exists = document.querySelector(".product-title h2");
+      if (exists && window.loadProductData) {
+        clearInterval(checkDOM);
+        window.loadProductData(); // Run the function from your external JS
+      }
+    }, 100);
+
+    const checkDOMU = setInterval(() => {
+      const btn = document.querySelector(".wishlist-btn");
+      if (btn && typeof window.dispatchWishlistUpdate === "function") {
+        btn.addEventListener("click", () => {
+          setTimeout(() => {
+            window.dispatchWishlistUpdate();
+          }, 100); // slight delay to ensure localStorage updates
+        });
+        clearInterval(checkDOMU);
+      }
+    }, 100);
+
+    // Initialize Owl Carousel if jQuery is available
+    if (globalThis.$) {
+      globalThis.$("#home-slider").owlCarousel({
+        items: 1,
+        loop: true,
+        autoplay: true,
+        autoplayTimeout: 5000,
+        dots: true,
+      });
+    } else {
+      console.error("jQuery not found! Ensure it's loaded before Owl Carousel.");
+    }
+
+    // Initialize Swiper for product template
+    if (globalThis.Swiper) {
+      new Swiper("#pro-template", {
+        loop: true,
+        autoplay: {
+          delay: 3000,
+          disableOnInteraction: false,
+        },
+        spaceBetween: 20,
+        slidesPerView: 1,
+        breakpoints: {
+          360: { slidesPerView: 2 },
+          992: { slidesPerView: 3 },
+          1200: { slidesPerView: 4 },
+        },
+        pagination: {
+          el: ".swiper-pagination",
+          clickable: true,
+        },
+        navigation: {
+          nextEl: ".swiper-button-next",
+          prevEl: ".swiper-button-prev",
+        },
+      });
+
+      // Initialize Swiper for blog template
+      new Swiper("#blog-template", {
+        slidesPerView: 1,
+        spaceBetween: 20,
+        pagination: {
+          el: ".swiper-pagination",
+          clickable: true,
+        },
+        navigation: {
+          nextEl: ".swiper-button-next",
+          prevEl: ".swiper-button-prev",
+        },
+        breakpoints: {
+          640: { slidesPerView: 2 },
+          1200: { slidesPerView: 3 },
+        },
+      });
+    } else {
+      console.error("Swiper is not loaded. Check your script link in app.html.");
+    }
+
+    // Initialize Slick Slider for testimonials with proper responsive settings
+    if (globalThis.$) {
+      globalThis.$(".slider-for").slick({
+        slidesToShow: 1,
+        slidesToScroll: 1,
+        arrows: true,
+        dots: true,
+        autoplay: true,
+        autoplaySpeed: 3000,
+        infinite: true,
+        prevArrow:
+          '<button class="slick-prev"><i class="fa fa-chevron-left"></i></button>',
+        nextArrow:
+          '<button class="slick-next"><i class="fa fa-chevron-right"></i></button>',
+        
+      });
+    } else {
+      console.error("jQuery not found! Ensure it's loaded before Slick Slider.");
+    }
+  });
 </script>
+
+<style>
+.manj {
+  color: #333333 !important;
+}
+</style>
+
+
 
 <main>
   <!-- home-slider start -->
@@ -27,7 +137,7 @@
                   <span class="sub-title e1"
                     >Sweet Moments, Flavorful Delights</span
                   >
-                  <h2 class="e1">Indulge in Every Bite</h2>
+                  <h2 class="e1 manj">Indulge in Every Bite</h2>
                   <p class="e1">
                     whether it’s the comforting warmth of a freshly baked
                     snack, the rich flavors of our signature rice dishes, or
@@ -65,7 +175,7 @@
                   <span class="sub-title e1">
                     Your Cravings, Our Creations</span
                   >
-                  <h2 class="e1">Craving Something Sweet?</h2>
+                  <h2 class="e1 manj">Craving Something Sweet?</h2>
                   <p class="e1">
                     Your treat awaits—whether it's a warm, freshly baked
                     delight, a flavorful rice dish, or a refreshing drink,
@@ -100,7 +210,7 @@
                   class="slider-text-info slider-content-left slider-text-left"
                 >
                   <span class="sub-title e1">We make life sweet</span>
-                  <h2 class="e1">Baked to Perfection</h2>
+                  <h2 class="e1 manj">Baked to Perfection</h2>
                   <p class="e1">
                     Deliciously made, carefully packed, and delivered with
                     love because you deserve only the best!
@@ -4255,7 +4365,7 @@
                       <span class="date-time">14 May, 2024</span>
                       <span>By Crave & Crumble</span>
                     </div>
-                    <a href="/article-post-without" class="blog-img">
+                    <a href="/article" class="blog-img">
                       <img
                         src="/assets/img/blog/banno-blog-01.jpg"
                         class="img-fluid"
@@ -4270,22 +4380,22 @@
                     <div class="blog-tag">
                       <ul>
                         <li>
-                          <a href="/article-post-without"
+                          <a href="/article"
                             >antiquestore</a
                           >
                         </li>
                         <li>
-                          <a href="/article-post-without">blog</a>
+                          <a href="/article">blog</a>
                         </li>
                         <li>
-                          <a href="/article-post-without"
+                          <a href="/article"
                             >homeaccessories</a
                           >
                         </li>
                       </ul>
                     </div>
                     <h6 class="blog-title">
-                      <a href="/article-post-without">
+                      <a href="/article">
                         The Secret to Perfect Jollof Rice
                       </a>
                     </h6>
@@ -4294,7 +4404,7 @@
                       Jollof Rice flavorful, rich, and...
                     </p>
                     <a
-                      href="article-post-without"
+                      href="article"
                       class="read-btn btn btn-style2"
                     >
                       <span>Read more</span>
@@ -4309,7 +4419,7 @@
                       <span class="date-time">19 June, 2024</span>
                       <span>By Crave & Crumble</span>
                     </div>
-                    <a href="/article-post-without" class="blog-img">
+                    <a href="/article" class="blog-img">
                       <img
                         src="/assets/img/blog/banno-blog-02.jpg"
                         class="img-fluid"
@@ -4324,22 +4434,22 @@
                     <div class="blog-tag">
                       <ul>
                         <li>
-                          <a href="/article-post-without"
+                          <a href="/article"
                             >antiquestore</a
                           >
                         </li>
                         <li>
-                          <a href="/article-post-without">blog</a>
+                          <a href="/article">blog</a>
                         </li>
                         <li>
-                          <a href="/article-post-without"
+                          <a href="/article"
                             >homeaccessories</a
                           >
                         </li>
                       </ul>
                     </div>
                     <h6 class="blog-title">
-                      <a href="/article-post-without"
+                      <a href="/article"
                         >Why Freshly Baked Snacks Taste Better
                       </a>
                     </h6>
@@ -4348,7 +4458,7 @@
                       snacks have the best texture and taste...
                     </p>
                     <a
-                      href="article-post-without"
+                      href="article"
                       class="read-btn btn btn-style2"
                     >
                       <span>Read more</span>
@@ -4363,7 +4473,7 @@
                       <span class="date-time">10 November, 2024</span>
                       <span>By Crave & Crumble</span>
                     </div>
-                    <a href="/article-post-without" class="blog-img">
+                    <a href="/article" class="blog-img">
                       <img
                         src="/assets/img/blog/banno-blog-03.jpg"
                         class="img-fluid"
@@ -4378,22 +4488,22 @@
                     <div class="blog-tag">
                       <ul>
                         <li>
-                          <a href="/article-post-without"
+                          <a href="/article"
                             >antiquestore</a
                           >
                         </li>
                         <li>
-                          <a href="/article-post-without">blog</a>
+                          <a href="/article">blog</a>
                         </li>
                         <li>
-                          <a href="/article-post-without"
+                          <a href="/article"
                             >homeaccessories</a
                           >
                         </li>
                       </ul>
                     </div>
                     <h6 class="blog-title">
-                      <a href="/article-post-without"
+                      <a href="/article"
                         >Zobo vs. Cocktails: Which Drink is Right for
                         You?</a
                       >
@@ -4403,7 +4513,7 @@
                       flavors, and when to enjoy them...
                     </p>
                     <a
-                      href="article-post-without"
+                      href="article"
                       class="read-btn btn btn-style2"
                     >
                       <span>Read more</span>
@@ -4418,7 +4528,7 @@
                       <span class="date-time">1 December, 2024</span>
                       <span>By Crave & Crumble</span>
                     </div>
-                    <a href="/article-post-without" class="blog-img">
+                    <a href="/article" class="blog-img">
                       <img
                         src="/assets/img/blog/banno-blog-04.jpg"
                         class="img-fluid"
@@ -4433,22 +4543,22 @@
                     <div class="blog-tag">
                       <ul>
                         <li>
-                          <a href="/article-post-without"
+                          <a href="/article"
                             >antiquestore</a
                           >
                         </li>
                         <li>
-                          <a href="/article-post-without">blog</a>
+                          <a href="/article">blog</a>
                         </li>
                         <li>
-                          <a href="/article-post-without"
+                          <a href="/article"
                             >homeaccessories</a
                           >
                         </li>
                       </ul>
                     </div>
                     <h6 class="blog-title">
-                      <a href="/article-post-without"
+                      <a href="/article"
                         >5 Must-Try Snacks for Every Food Lover</a
                       >
                     </h6>
@@ -4457,7 +4567,7 @@
                       these snacks from Crave & Crumble are a must-try...
                     </p>
                     <a
-                      href="article-post-without"
+                      href="article"
                       class="read-btn btn btn-style2"
                     >
                       <span>Read more</span>
@@ -4472,7 +4582,7 @@
                       <span class="date-time">20 December, 2024</span>
                       <span>By Crave & Crumble</span>
                     </div>
-                    <a href="/article-post-without" class="blog-img">
+                    <a href="/article" class="blog-img">
                       <img
                         src="/assets/img/blog/banno-blog-05.jpg"
                         class="img-fluid"
@@ -4487,22 +4597,22 @@
                     <div class="blog-tag">
                       <ul>
                         <li>
-                          <a href="/article-post-without"
+                          <a href="/article"
                             >antiquestore</a
                           >
                         </li>
                         <li>
-                          <a href="/article-post-without">blog</a>
+                          <a href="/article">blog</a>
                         </li>
                         <li>
-                          <a href="/article-post-without"
+                          <a href="/article"
                             >homeaccessories</a
                           >
                         </li>
                       </ul>
                     </div>
                     <h6 class="blog-title">
-                      <a href="/article-post-without"
+                      <a href="/article"
                         >How to Pair Your Meal with the Perfect Drink
                       </a>
                     </h6>
@@ -4511,7 +4621,7 @@
                       rice, and your favorite snacks...
                     </p>
                     <a
-                      href="article-post-without"
+                      href="article"
                       class="read-btn btn btn-style2"
                     >
                       <span>Read more</span>
@@ -4526,7 +4636,7 @@
                       <span class="date-time">4 January, 2025</span>
                       <span>By Crave & Crumble</span>
                     </div>
-                    <a href="/article-post-without" class="blog-img">
+                    <a href="/article" class="blog-img">
                       <img
                         src="/assets/img/blog/banno-blog-06.jpg"
                         class="img-fluid"
@@ -4541,22 +4651,22 @@
                     <div class="blog-tag">
                       <ul>
                         <li>
-                          <a href="/article-post-without"
+                          <a href="/article"
                             >antiquestore</a
                           >
                         </li>
                         <li>
-                          <a href="/article-post-without">blog</a>
+                          <a href="/article">blog</a>
                         </li>
                         <li>
-                          <a href="/article-post-without"
+                          <a href="/article"
                             >homeaccessories</a
                           >
                         </li>
                       </ul>
                     </div>
                     <h6 class="blog-title">
-                      <a href="/article-post-without"
+                      <a href="/article"
                         >The Magic of Homemade Meals vs. Fast Food
                       </a>
                     </h6>
@@ -4564,7 +4674,7 @@
                       Nothing beats the rich taste and quality of freshly
                       prepared meals—see why homemade always wins...
                       <a
-                        href="article-post-without"
+                        href="article"
                         class="read-btn btn btn-style2"
                       >
                         <span>Read more</span>

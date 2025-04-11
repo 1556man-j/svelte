@@ -1,18 +1,21 @@
-document.addEventListener("DOMContentLoaded", function () {
-  function getProductId() {
-    return window.location.pathname.split("/").pop();
-  }
+function getProductId() {
+  return window.location.pathname.split("/").pop();
+}
 
-  fetch("/json/product-data.json")
+function loadProductData() {
+  fetch("/assets/json/product-data.json")
     .then((response) => response.json())
     .then((products) => {
       const productId = getProductId();
       const product = products.find((p) => p.id === productId);
 
       if (product) {
+        const title = document.querySelector(".product-title h2");
+        if (!title) return; // Don't continue if DOM isn't ready
+
         document.querySelector(".breadcrumb-title h2").innerText = product.name;
         document.querySelector(".breadcrumb-item-link span").innerText = product.name;
-        document.querySelector(".product-title h2").innerText = product.name;
+        title.innerText = product.name;
         document.querySelector(".true-price").innerText = product.price;
         document.querySelector(".product-imag").src = product.image;
         document.querySelector(".product-single.img-link").href = product.image;
@@ -21,4 +24,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     })
     .catch((error) => console.error("Error fetching product data:", error));
-});
+}
+
+// Export the function so Svelte can trigger it
+window.loadProductData = loadProductData;

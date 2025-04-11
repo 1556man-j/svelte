@@ -79,7 +79,7 @@ function updateCartDisplay() {
             <div class="info-item">
               <span class="product-qty">${item.quantity}</span>
               <span>×</span>
-              <span class="product-price">$${parseFloat(item.price).toFixed(2)}</span>
+              <span class="product-price">€${parseFloat(item.price).toFixed(2)}</span>
             </div>
           </div>
           </div>
@@ -117,7 +117,7 @@ function updateCartDisplay() {
   if (mobileCartCount) mobileCartCount.textContent = totalItems;
 
   if (subtotalPriceElement) {
-    subtotalPriceElement.textContent = `$${subtotal.toFixed(2)}`;
+    subtotalPriceElement.textContent = `€${subtotal.toFixed(2)}`;
   }
 
   // Event listeners for quantity adjustment and item removal

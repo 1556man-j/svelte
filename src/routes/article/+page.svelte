@@ -1,6 +1,49 @@
 <script>
+  import { onMount } from 'svelte';
 
+  onMount(() => {
+    if (globalThis.Swiper) {
+      new Swiper("#blog-template", {
+        loop: true, // Enable looped slides
+        autoplay: {
+          delay: 5000, // 5 seconds autoplay delay
+          disableOnInteraction: false, // Keep autoplaying after user interaction
+        },
+        navigation: {
+          nextEl: '.swiper-next',
+          prevEl: '.swiper-prev',
+        },
+        pagination: {
+          el: '.swiper-pagination', // Optional if you want pagination dots
+          clickable: true,
+        },
+        slidesPerView: 1, // One slide at a time for mobile
+        breakpoints: {
+          640: {
+            slidesPerView: 2, // Two slides on small screens
+            spaceBetween: 30, 
+          },
+        }
+      });
+    }
+  });
 </script>
+
+<style>
+  .blog-desc{
+  display: -webkit-box; 
+  -webkit-box-orient: vertical; 
+  -webkit-line-clamp: 2; 
+  line-clamp: 2; 
+  overflow: hidden;
+  text-overflow: ellipsis; 
+}
+.blog-title{
+  margin-top: 30px;
+}
+
+</style>
+
 
  <!-- main section start-->
  <main>
@@ -319,7 +362,7 @@
                             From its soft, fluffy layers to the sweet and tangy burst of fresh strawberries, this cake is a treat you won’t resist!
                           </p>
                           <a
-                            href="article"
+                            href="/article"
                             class="read-btn btn btn-style2"
                           >
                             <span>Read more</span>
@@ -365,7 +408,7 @@
                             Dive into the world of deep, chocolatey goodness—where every bite is soft, moist, and irresistibly delicious!
                           </p>
                           <a
-                            href="article"
+                            href="/article"
                             class="read-btn btn btn-style2"
                           >
                             <span>Read more</span>
@@ -409,7 +452,7 @@
                             From caramel-drizzled layers to coffee-infused sponges, discover the rich flavors of brown-hued cakes!
                           </p>
                           <a
-                            href="article"
+                            href="/article"
                             class="read-btn btn btn-style2"
                           >
                             <span>Read more</span>
@@ -452,7 +495,7 @@
                           <p class="blog-desc">
                             Tall, smooth, and beautifully layered—this cylinder-shaped cake isn’t just a dessert, it’s a masterpiece of flavor and freshness!
                           <a
-                            href="article"
+                            href="/article"
                             class="read-btn btn btn-style2"
                           >
                             <span>Read more</span>
@@ -498,7 +541,7 @@
                             Soft, fluffy, and topped with creamy goodness—cupcakes are the perfect bite-sized treat for any occasion!
                           </p>
                           <a
-                            href="article"
+                            href="/article"
                             class="read-btn btn btn-style2"
                           >
                             <span>Read more</span>
@@ -544,7 +587,7 @@
                             Great food isn’t just about taste—it’s about presentation! Discover how perfectly plated meals and beautifully crafted pastries make every bite even more enjoyable.
                           </p>
                           <a
-                            href="article"
+                            href="/article"
                             class="read-btn btn btn-style2"
                           >
                             <span>Read more</span>
@@ -588,7 +631,7 @@
                             From golden croissants to rich, creamy puffs, discover what makes pastries the ultimate comfort treat!
                           </p>
                           <a
-                            href="article"
+                            href="/article"
                             class="read-btn btn btn-style2"
                           >
                             <span>Read more</span>
@@ -634,7 +677,7 @@
                             Whether it’s the satisfying crunch of Chin Chin or the soft, pillowy goodness of Puff Puff, these classic pastries bring joy in every bite!
                           </p>
                           <a
-                            href="article"
+                            href="/article"
                             class="read-btn btn btn-style2"
                           >
                             <span>Read more</span>
