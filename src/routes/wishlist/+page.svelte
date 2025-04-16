@@ -7,6 +7,7 @@
 	// Function to load wishlist from localStorage
 	function loadWishlist() {
 		wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+		
 	}
 
 	// Function to load cart from localStorage
@@ -17,8 +18,7 @@
 	// Function to update wishlist count
 	function updateWishlistCount() {
 		const count = wishlist.length;
-		const counters = document.querySelectorAll('.wishlist-counter');
-		counters.forEach((counter) => (counter.textContent = count));
+		
 	}
 
 	// Function to add item to cart
@@ -51,6 +51,7 @@
 		wishlist = wishlist.filter((item) => item.id !== productId);
 		localStorage.setItem('wishlist', JSON.stringify(wishlist));
 		updateWishlistCount();
+		window.dispatchEvent(new CustomEvent('wishlistUpdated'));
 	}
 
 	// Function to clear wishlist
@@ -59,6 +60,7 @@
 			localStorage.removeItem('wishlist');
 			wishlist = [];
 			updateWishlistCount();
+			window.dispatchEvent(new CustomEvent('wishlistUpdated'));
 		}
 	}
 
