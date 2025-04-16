@@ -1,68 +1,166 @@
 <script>
-  
+  import { onMount } from 'svelte';
+
+  let cartItems = [];
+  let totalItems = 0;
+  let totalPrice = 0;
+
+  function loadCart() {
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    cartItems = cart;
+    totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+    totalPrice = cart.reduce((sum, item) => sum + item.quantity * item.price, 0);
+  }
+
+  function updateCart() {
+    localStorage.setItem('cart', JSON.stringify(cartItems));
+    loadCart();
+    window.dispatchEvent(new CustomEvent('cartUpdated'));
+  }
+
+  function increaseQuantity(id) {
+    const item = cartItems.find(p => p.id === id);
+    if (item) {
+      item.quantity += 1;
+      updateCart();
+    }
+  }
+
+  function decreaseQuantity(id) {
+    const item = cartItems.find(p => p.id === id);
+    if (item && item.quantity > 1) {
+      item.quantity -= 1;
+      updateCart();
+    }
+  }
+
+  function removeItem(id) {
+    cartItems = cartItems.filter(p => p.id !== id);
+    updateCart();
+  }
+
+  onMount(() => {
+    loadCart();
+
+    window.addEventListener('cartUpdated', () => {
+      loadCart();
+    });
+
+    // Listen for 'storage' events to handle changes from other tabs/windows
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'cart') {
+        loadCart();
+      }
+    });
+
+    document.querySelector('.cart-close')?.addEventListener('click', () => {
+      document.querySelector('.mini-cart')?.classList.remove('active');
+    });
+  });
+
+
+
+
+    // Action to detect clicks outside the specified node
+    function clickOutside(node) {
+    const handleClick = event => {
+      if (!node.contains(event.target)) {
+        node.classList.remove('active'); // Close the miniCart
+      }
+    };
+
+    document.addEventListener('click', handleClick, true);
+
+    return {
+      destroy() {
+        document.removeEventListener('click', handleClick, true);
+      }
+    };
+  }
 </script>
 
 <!-- mini-cart start -->
-<div class="mini-cart">
+<div class="mini-cart use:clickOutside">
   <div class="cart-text">
-    <!-- mini cart-empty start -->
-    <p class="d-none">No products in the cart.</p>
-    <!-- mini cart-empty end -->
-    <!-- mini cart-fill start -->
-    <p>
+    <p class={cartItems.length ? 'd-none' : ''}>No products in the cart.</p>
+    <p class={cartItems.length ? '' : 'd-none'}>
       <span class="cart-count-desc">There are</span>
-      <span class="cart-counters">0</span>
+      <span class="cart-counters">{totalItems}</span>
       <span class="cart-count-desc">products</span>
     </p>
-    <!-- mini cart-fill end -->
-    <!-- mini cart-close start -->
     <button class="cart-close"><i class="feather-x"></i></button>
-    <!-- mini cart-close end -->
   </div>
-  <!-- mini cart empty-content start -->
-  <div class="empty-cart d-none">
+
+  <div class={"empty-cart " + (cartItems.length ? 'd-none' : '')}>
     <span class="cart-icon"><i class="bi bi-bag-dash"></i></span>
-    <a href="collection.html" class="btn btn-style">Continue shopping</a>
+    <a href="/collection" class="btn btn-style">Continue shopping</a>
   </div>
-  <!-- mini cart empty-content end -->
+
   <ul class="cart-item" id="cart-items">
-    
+    {#each cartItems as item}
+      <li class="cart-product item-info">
+        <div class="item-img cart-img">
+          <a href="javascript:void(0)" class="img-area">
+            <img src={item.image} class="img-fluid" alt={item.name} />
+          </a>
+        </div>
+        <div class="cart-content item-title">
+          <div class="info">
+            <h6>{item.name}</h6>
+            <div class="product-info">
+              <div class="info-item">
+                <span class="product-qty">{item.quantity}</span>
+                <span>×</span>
+                <span class="product-price">€{parseFloat(item.price).toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+          <div class="product-quantity-action">
+            <div class="product-quantity">
+              <div class="cart-plus-minus">
+                <button class="dec qtybutton minus" on:click={() => decreaseQuantity(item.id)}>
+                  <i class="feather-minus"></i>
+                </button>
+                <input type="text" name="quantity" value={item.quantity} disabled />
+                <button class="inc qtybutton plus" on:click={() => increaseQuantity(item.id)}>
+                  <i class="feather-plus"></i>
+                </button>
+              </div>
+            </div>
+            <div class="delete-cart item-remove">
+              <a href="javascript:void(0)" class="delete-icon text-danger remove-item" on:click={() => removeItem(item.id)}>
+                <i class="feather-trash-2"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </li>
+    {/each}
   </ul>
-  <!-- mini cart-total start -->
+
   <ul class="subtotal-area">
     <li class="subtotal-info">
       <div class="subtotal-titles">
-        <!-- mini cart total-title start -->
         <h6 class="cart-total">Subtotal:</h6>
-        <!-- mini cart total-title end -->
-        <!-- mini cart total-price start -->
-        <span class="subtotal-price">€0.00</span>
-        <!-- mini cart total-price end -->
+        <span class="subtotal-price">€{parseFloat(totalPrice).toFixed(2)}</span>
       </div>
     </li>
     <li class="mini-info">
-      <!-- mini cart agree-text start -->
       <label class="box-area">
-        <span class="agree-text"
-          >I have read and agree with the
-          <a href="terms-condition.html">terms & condition.</a></span
-        >
+        <span class="agree-text">
+          I have read and agree with the
+          <a href="/terms-condition">terms & condition.</a>
+        </span>
         <input type="checkbox" class="cust-checkbox" />
         <span class="cust-check"></span>
       </label>
-      <!-- mini cart agree-text end -->
-      <!-- mini cart button start -->
       <div class="cart-btn">
-        <a href="cart-page.html" class="btn btn-style2">View cart</a>
-        <a
-          href="checkout-style1.html"
-          class="btn btn-style2 checkout disabled"
-          >Checkout</a
-        >
+        <a href="/cart" class="btn btn-style2">View cart</a>
+        <a href="/checkout" class="btn btn-style2 checkout {totalItems === 0 ? 'disabled' : ''}">
+          Checkout
+        </a>
       </div>
-      <!-- mini cart button end -->
     </li>
   </ul>
-  <!-- mini cart-total end -->
 </div>
-<!-- mini cart end -->
+<!-- mini-cart end -->

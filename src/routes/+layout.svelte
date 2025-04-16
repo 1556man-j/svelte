@@ -6,26 +6,21 @@
 	import Mobile from '../components/Mobile.svelte';
 	import Notification from '../components/Notification.svelte';
 	import Preloader from '../components/Preloader.svelte';
-	import Quickview from '../components/Quickview.svelte';
 	import Screenbg from '../components/Screenbg.svelte';
 	import Search from '../components/Search.svelte';
 	import Totop from '../components/Totop.svelte';
 </script>
 
-
-<Minicart/>
-<Search/>
-<Quickview/>
-
-<Preloader/>
+<Minicart />
+<Search />
+<Preloader />
 <Header />
 <main>
-    <slot />  <!-- This is where the page content (Home, About, etc.) will be inserted -->
+	<slot />
+	<!-- This is where the page content (Home, About, etc.) will be inserted -->
 </main>
-<Footer/>
-<Screenbg/>
-<Mobile/>
-<Totop/>
-<Notification/>
-
-
+<Footer />
+<Screenbg />
+<Mobile />
+<Totop />
+<Notification />

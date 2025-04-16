@@ -1,42 +1,286 @@
 <script>
-  import { onMount } from "svelte";
+	import { onMount } from 'svelte';
 
-  onMount(() => {
-	// Wait until DOM is ready before running the JS
-    const checkDOM = setInterval(() => {
-      const exists = document.querySelector(".product-title h2");
-      if (exists && window.loadProductData) {
-        clearInterval(checkDOM);
-        window.loadProductData(); // Run the function from your external JS
-      }
-    }, 100);
+	onMount(() => {
+		loadCart();
+		updateCartDisplay();
 
+		// Listen for custom 'cartUpdated' events
+		window.addEventListener('cartUpdated', () => {
+			loadCart();
+			updateCartDisplay();
+		});
 
+		// Listen for 'storage' events to handle changes from other tabs/windows
+		window.addEventListener('storage', (event) => {
+			if (event.key === 'cart') {
+				loadCart();
+				updateCartDisplay();
+				updateCartCount();
+			}
+		});
 
-    if (globalThis.Swiper) {
-      new Swiper("#cart-pro-template", {
-        loop: true,
-        autoplay: {
-          delay: 3000,
-          disableOnInteraction: false,
-        },
-        spaceBetween: 20,
-        slidesPerView: 1,
-        breakpoints: {
-          360: { slidesPerView: 2 },
-          992: { slidesPerView: 3 },
-          1200: { slidesPerView: 4 },
-        },
-        pagination: {
-          el: ".swiper-pagination",
-          clickable: true,
-        },
-        navigation: {
-          nextEl: ".swiper-button-next",
-          prevEl: ".swiper-button-prev",
-        },
-      })
- }});
+		// Event delegation for quantity buttons and remove links
+		document.querySelector('.cart-wrap-ul.cart-item').addEventListener('click', (event) => {
+			const target = event.target;
+			const id = target.getAttribute('data-id');
+			if (id) {
+				if (target.classList.contains('minus')) {
+					adjustQuantity(id, -1);
+				} else if (target.classList.contains('plus')) {
+					adjustQuantity(id, 1);
+				} else if (target.classList.contains('remove-item')) {
+					removeItem(id);
+				}
+			}
+		});
+
+		// Attach event listener to the Clear Cart button
+		const clearCartButton = document.getElementById('clear-cart');
+		if (clearCartButton) {
+			clearCartButton.addEventListener('click', clearCart);
+		}
+
+		const clearCartTotalButton = document.getElementById('clear-cart-total');
+		if (clearCartTotalButton) {
+			clearCartTotalButton.addEventListener('click', clearCart);
+		}
+
+		// Wait until DOM is ready before running the JS
+		const checkDOM = setInterval(() => {
+			const exists = document.querySelector('.product-title h2');
+			if (exists && window.loadProductData) {
+				clearInterval(checkDOM);
+				window.loadProductData(); // Run the function from your external JS
+			}
+		}, 100);
+
+		if (globalThis.Swiper) {
+			new Swiper('#cart-pro-template', {
+				loop: true,
+				autoplay: {
+					delay: 3000,
+					disableOnInteraction: false
+				},
+				spaceBetween: 20,
+				slidesPerView: 1,
+				breakpoints: {
+					360: { slidesPerView: 2 },
+					992: { slidesPerView: 3 },
+					1200: { slidesPerView: 4 }
+				},
+				pagination: {
+					el: '.swiper-pagination',
+					clickable: true
+				},
+				navigation: {
+					nextEl: '.swiper-button-next',
+					prevEl: '.swiper-button-prev'
+				}
+			});
+		}
+	});
+
+	function handleAddToCart(event) {
+		event.preventDefault();
+
+		const target = event.currentTarget;
+
+		const product = {
+			id: target.dataset.id,
+			name: target.dataset.name,
+			price: parseFloat(target.dataset.price),
+			image: target.dataset.image,
+			quantity: 1
+		};
+
+		let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+		const existing = cart.find((p) => p.id === product.id);
+		if (existing) {
+			existing.quantity += 1;
+		} else {
+			cart.push(product);
+		}
+
+		localStorage.setItem('cart', JSON.stringify(cart));
+		console.log('Cart updated:', cart); // Debugging log ✅
+
+		// Dispatch custom event
+		window.dispatchEvent(new CustomEvent('cartUpdated'));
+
+		// Open mini-cart sidebar
+		document.querySelector('.mini-cart')?.classList.add('active');
+	}
+
+	let cart = [];
+
+	// Load cart from localStorage
+	function loadCart() {
+		const storedCart = localStorage.getItem('cart');
+		cart = storedCart ? JSON.parse(storedCart) : [];
+	}
+
+	// Save cart to localStorage
+	function saveCart() {
+		localStorage.setItem('cart', JSON.stringify(cart));
+		window.dispatchEvent(new CustomEvent('cartUpdated'));
+	}
+
+	// Update cart display
+	function updateCartDisplay() {
+		const cartList = document.querySelector('.cart-wrap-ul.cart-item');
+		const subtotalPriceElement = document.querySelector('.subtotal');
+		const totalPriceElement = document.querySelector('.total-price');
+		const cartCounter = document.getElementById('cart-counters');
+
+		if (cartList) {
+			cartList.innerHTML = ''; // Clear existing items
+			let subtotal = 0;
+
+			cart.forEach((item) => {
+				const itemTotalPrice = item.price * item.quantity;
+				subtotal += itemTotalPrice;
+
+				const li = document.createElement('li');
+				li.classList.add('item-info');
+				li.innerHTML = `
+           <!-- cart-img start -->
+      <div class="item-img">
+         <a href="/product-template/${item.id}">
+          <img src="${item.image}" class="img-fluid" alt="${item.name}" />
+        </a>
+      </div>
+      <!-- cart-img end -->
+
+      <!-- cart-title start -->
+      <div class="item-title">
+         <a href="/product-template/${item.id}">${item.name}</a>
+        <span class="item-option">
+          <span class="pro-variant-title">Quantity:</span>
+          <span class="pro-variant-type">${item.quantity}</span>
+        </span>
+        <span class="item-option">
+          <span class="item-price">€${item.price.toFixed(2)}</span>
+        </span>
+      </div>
+      <!-- cart-title end -->
+        `;
+				cartList.appendChild(li);
+
+				const qtyAndRemove = document.createElement('li');
+				qtyAndRemove.classList.add('item-qty');
+				qtyAndRemove.innerHTML = `
+      <div class="product-quantity-action">
+        <div class="product-quantity">
+          <div class="cart-plus-minus">
+            <button type="button" class="dec qtybutton minus" data-id="${item.id}">
+              <i class="feather-minus"></i>
+            </button>
+            <input type="text" name="quantity" value="${item.quantity}" disabled />
+            <button type="button" class="inc qtybutton plus" data-id="${item.id}">
+              <i class="feather-plus"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="item-remove">
+        <span class="remove-wrap">
+          <a href="javascript:void(0)" class="text-danger remove-item" data-id="${item.id}">Remove</a>
+        </span>
+      </div>
+    `;
+				cartList.appendChild(qtyAndRemove);
+
+				const priceDetails = document.createElement('li');
+				priceDetails.classList.add('item-price');
+				priceDetails.innerHTML = `<span class="amount full-price">€${itemTotalPrice.toFixed(2)}</span>`;
+				cartList.appendChild(priceDetails);
+			});
+
+			// Update subtotal
+			if (subtotalPriceElement) {
+				subtotalPriceElement.textContent = `€${subtotal.toFixed(2)}`;
+			}
+
+			// Update total (assuming no additional fees or taxes)
+			if (totalPriceElement) {
+				totalPriceElement.textContent = `€${subtotal.toFixed(2)}`;
+			}
+
+			// Update cart counter
+			if (cartCounter) {
+				cartCounter.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+			}
+		}
+	}
+
+	// Adjust item quantity
+	function adjustQuantity(id, change) {
+		const item = cart.find((item) => item.id === id);
+		if (item) {
+			item.quantity += change;
+			if (item.quantity <= 0) {
+				removeItem(id);
+			} else {
+				saveCart();
+				updateCartDisplay();
+			}
+		}
+	}
+
+	// Remove item from cart
+	function removeItem(id) {
+		cart = cart.filter((item) => item.id !== id);
+		saveCart();
+		updateCartDisplay();
+	}
+
+	// Add item to cart
+	function addToCart(newItem) {
+		const existingItem = cart.find((item) => item.id === newItem.id);
+		if (existingItem) {
+			existingItem.quantity += newItem.quantity;
+		} else {
+			cart.push(newItem);
+		}
+		saveCart();
+		updateCartDisplay();
+	}
+
+	function clearCart() {
+		if (confirm('Are you sure you want to clear the cart?')) {
+			localStorage.removeItem('cart');
+			cart = [];
+			updateCartDisplay();
+			window.dispatchEvent(new CustomEvent('cartUpdated'));
+		}
+	}
+
+	window.dispatchEvent(new CustomEvent('cartUpdated'));
+
+	function handleWishlistClick(event) {
+		const btn = event.currentTarget;
+		const id = btn.dataset.id;
+		const name = btn.dataset.name;
+		const price = btn.dataset.price;
+		const image = btn.dataset.image;
+
+		let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+
+		const exists = wishlist.some((item) => item.id === id);
+
+		if (exists) {
+			alert('Item already in wishlist!');
+		} else {
+			wishlist.push({ id, name, price, image });
+			localStorage.setItem('wishlist', JSON.stringify(wishlist));
+			alert('Added to wishlist!');
+
+			// Dispatch custom event to notify other components
+			window.dispatchEvent(new CustomEvent('wishlistUpdated'));
+		}
+	}
 </script>
 
 <!-- main section start-->
@@ -89,7 +333,9 @@
 										</div>
 										<div class="cart-buttons">
 											<a href="/collection" class="btn-style2">Continue shopping</a>
-											<button id="clear-cart" class="btn-style2 clear">Clear Cart</button>
+											<button type="button" id="clear-cart" class="btn-style2 clear"
+												>Clear Cart</button
+											>
 										</div>
 									</div>
 									<div class="special-notes">
@@ -101,10 +347,12 @@
 									<!-- Cart items will be dynamically injected here -->
 								</div>
 								<div class="cart-summary">
-									<p>Subtotal: <span class="subtotal-price">€0.00</span></p>
+									<p>Subtotal: <span class="subtotal-price subtotal">€0.00</span></p>
 									<div class="cart-buttons">
 										<a href="/collection" class="btn-style2">Continue Shopping</a>
-										<button id="clear-cart" class="btn-style2 clear">Clear Cart</button>
+										<button type="button" id="clear-cart-total" class="btn-style2 clear"
+											>Clear Cart</button
+										>
 									</div>
 								</div>
 							</div>
@@ -157,13 +405,13 @@
 									<div class="cart-total">
 										<div class="total-amount">
 											<h6 class="total-title">Total</h6>
-											<span class="amount total-price">€56.00</span>
+											<span class="amount total-price">€.00</span>
 										</div>
 										<div class="proceed-to-discount">
 											<input type="text" name="discount" placeholder="Discount code" />
 										</div>
 										<div class="proceed-to-checkout">
-											<a href="/checkout-style1">Checkout</a>
+											<a href="/checkout">Checkout</a>
 										</div>
 										<div class="cart-payment-icon">
 											<a href="javascript:void(0)" class="payment-icon">
@@ -236,6 +484,7 @@
 														data-name="Candy nut chocolate"
 														data-price="11.00"
 														data-image="/assets/img/product/p-26.jpg"
+														on:click|preventDefault={handleWishlistClick}
 													>
 														<span class="tooltip-text">Wishlist</span>
 														<span class="wishlist-icon"><i class="feather-heart"></i></span>
@@ -247,6 +496,7 @@
 														data-name="Candy nut chocolate"
 														data-price="11.00"
 														data-image="/assets/img/product/p-26.jpg"
+														on:click={handleAddToCart}
 													>
 														<span class="tooltip-text">Add to cart</span>
 														<span class="cart-icon"><i class="feather-shopping-bag"></i></span>
@@ -306,6 +556,7 @@
 														data-name="Candy nut chocolate"
 														data-price="11.00"
 														data-image="/assets/img/product/p-26.jpg"
+														on:click|preventDefault={handleWishlistClick}
 													>
 														<span class="tooltip-text">Wishlist</span>
 														<span class="wishlist-icon"><i class="feather-heart"></i></span>
@@ -317,6 +568,7 @@
 														data-name="Candy nut chocolate"
 														data-price="11.00"
 														data-image="/assets/img/product/p-26.jpg"
+														on:click={handleAddToCart}
 													>
 														<span class="tooltip-text">Add to cart</span>
 														<span class="cart-icon"><i class="feather-shopping-bag"></i></span>
@@ -367,6 +619,7 @@
 														data-name="A bakery doughnuts"
 														data-price="21.00"
 														data-image="/assets/img/product/p-27.jpg"
+														on:click|preventDefault={handleWishlistClick}
 													>
 														<span class="tooltip-text">Wishlist</span>
 														<span class="wishlist-icon"><i class="feather-heart"></i></span>
@@ -378,6 +631,7 @@
 														data-name="A bakery doughnuts"
 														data-price="21.00"
 														data-image="/assets/img/product/p-27.jpg"
+														on:click={handleAddToCart}
 													>
 														<span class="tooltip-text">Add to cart</span>
 														<span class="cart-icon"><i class="feather-shopping-bag"></i></span>
@@ -437,6 +691,7 @@
 														data-name="A bakery doughnuts"
 														data-price="21.00"
 														data-image="/assets/img/product/p-27.jpg"
+														on:click|preventDefault={handleWishlistClick}
 													>
 														<span class="tooltip-text">Wishlist</span>
 														<span class="wishlist-icon"><i class="feather-heart"></i></span>
@@ -448,6 +703,7 @@
 														data-name="A bakery doughnuts"
 														data-price="21.00"
 														data-image="/assets/img/product/p-27.jpg"
+														on:click={handleAddToCart}
 													>
 														<span class="tooltip-text">Add to cart</span>
 														<span class="cart-icon"><i class="feather-shopping-bag"></i></span>
@@ -498,6 +754,7 @@
 														data-name="Fresh bread toast"
 														data-price="24.00"
 														data-image="/assets/img/product/p-29.jpg"
+														on:click|preventDefault={handleWishlistClick}
 													>
 														<span class="tooltip-text">Wishlist</span>
 														<span class="wishlist-icon"><i class="feather-heart"></i></span>
@@ -509,6 +766,7 @@
 														data-name="Fresh bread toast"
 														data-price="24.00"
 														data-image="/assets/img/product/p-29.jpg"
+														on:click={handleAddToCart}
 													>
 														<span class="tooltip-text">Add to cart</span>
 														<span class="cart-icon"><i class="feather-shopping-bag"></i></span>
@@ -568,6 +826,7 @@
 														data-name="Fresh bread toast"
 														data-price="24.00"
 														data-image="/assets/img/product/p-29.jpg"
+														on:click|preventDefault={handleWishlistClick}
 													>
 														<span class="tooltip-text">Wishlist</span>
 														<span class="wishlist-icon"><i class="feather-heart"></i></span>
@@ -579,6 +838,7 @@
 														data-name="Fresh bread toast"
 														data-price="24.00"
 														data-image="/assets/img/product/p-29.jpg"
+														on:click={handleAddToCart}
 													>
 														<span class="tooltip-text">Add to cart</span>
 														<span class="cart-icon"><i class="feather-shopping-bag"></i></span>
@@ -630,6 +890,7 @@
 														data-name="Jamun fruit pastry"
 														data-price="25.00"
 														data-image="/assets/img/product/p-34.jpg"
+														on:click|preventDefault={handleWishlistClick}
 													>
 														<span class="tooltip-text">Wishlist</span>
 														<span class="wishlist-icon"><i class="feather-heart"></i></span>
@@ -641,6 +902,7 @@
 														data-name="Jamun fruit pastry"
 														data-price="25.00"
 														data-image="/assets/img/product/p-34.jpg"
+														on:click={handleAddToCart}
 													>
 														<span class="tooltip-text">Add to cart</span>
 														<span class="cart-icon"><i class="feather-shopping-bag"></i></span>
@@ -700,6 +962,7 @@
 														data-name="Jamun fruit pastry"
 														data-price="25.00"
 														data-image="/assets/img/product/p-34.jpg"
+														on:click|preventDefault={handleWishlistClick}
 													>
 														<span class="tooltip-text">Wishlist</span>
 														<span class="wishlist-icon"><i class="feather-heart"></i></span>
@@ -711,6 +974,7 @@
 														data-name="Jamun fruit pastry"
 														data-price="25.00"
 														data-image="/assets/img/product/p-34.jpg"
+														on:click={handleAddToCart}
 													>
 														<span class="tooltip-text">Add to cart</span>
 														<span class="cart-icon"><i class="feather-shopping-bag"></i></span>
@@ -762,6 +1026,7 @@
 														data-name="Sandwich olka bread"
 														data-price="31.00"
 														data-image="/assets/img/product/p-37.jpg"
+														on:click|preventDefault={handleWishlistClick}
 													>
 														<span class="tooltip-text">Wishlist</span>
 														<span class="wishlist-icon"><i class="feather-heart"></i></span>
@@ -773,6 +1038,7 @@
 														data-name="Sandwich olka bread"
 														data-price="31.00"
 														data-image="/assets/img/product/p-37.jpg"
+														on:click={handleAddToCart}
 													>
 														<span class="tooltip-text">Add to cart</span>
 														<span class="cart-icon"><i class="feather-shopping-bag"></i></span>
@@ -832,6 +1098,7 @@
 														data-name="Sandwich olka bread"
 														data-price="31.00"
 														data-image="/assets/img/product/p-37.jpg"
+														on:click|preventDefault={handleWishlistClick}
 													>
 														<span class="tooltip-text">Wishlist</span>
 														<span class="wishlist-icon"><i class="feather-heart"></i></span>
@@ -843,6 +1110,7 @@
 														data-name="Sandwich olka bread"
 														data-price="31.00"
 														data-image="/assets/img/product/p-37.jpg"
+														on:click={handleAddToCart}
 													>
 														<span class="tooltip-text">Add to cart</span>
 														<span class="cart-icon"><i class="feather-shopping-bag"></i></span>
@@ -894,6 +1162,7 @@
 														data-name="Creamy for rasmalai"
 														data-price="54.00"
 														data-image="/assets/img/product/p-41.jpg"
+														on:click|preventDefault={handleWishlistClick}
 													>
 														<span class="tooltip-text">Wishlist</span>
 														<span class="wishlist-icon"><i class="feather-heart"></i></span>
@@ -905,6 +1174,7 @@
 														data-name="Creamy for rasmalai"
 														data-price="54.00"
 														data-image="/assets/img/product/p-41.jpg"
+														on:click={handleAddToCart}
 													>
 														<span class="tooltip-text">Add to cart</span>
 														<span class="cart-icon"><i class="feather-shopping-bag"></i></span>
@@ -964,6 +1234,7 @@
 														data-name="Creamy for rasmalai"
 														data-price="54.00"
 														data-image="/assets/img/product/p-41.jpg"
+														on:click|preventDefault={handleWishlistClick}
 													>
 														<span class="tooltip-text">Wishlist</span>
 														<span class="wishlist-icon"><i class="feather-heart"></i></span>
@@ -975,6 +1246,7 @@
 														data-name="Creamy for rasmalai"
 														data-price="54.00"
 														data-image="/assets/img/product/p-41.jpg"
+														on:click={handleAddToCart}
 													>
 														<span class="tooltip-text">Add to cart</span>
 														<span class="cart-icon"><i class="feather-shopping-bag"></i></span>
@@ -1026,6 +1298,7 @@
 														data-name="Red sugar biscuit"
 														data-price="61.00"
 														data-image="/assets/img/product/p-45.jpg"
+														on:click|preventDefault={handleWishlistClick}
 													>
 														<span class="tooltip-text">Wishlist</span>
 														<span class="wishlist-icon"><i class="feather-heart"></i></span>
@@ -1037,6 +1310,7 @@
 														data-name="Red sugar biscuit"
 														data-price="61.00"
 														data-image="/assets/img/product/p-45.jpg"
+														on:click={handleAddToCart}
 													>
 														<span class="tooltip-text">Add to cart</span>
 														<span class="cart-icon"><i class="feather-shopping-bag"></i></span>
@@ -1095,6 +1369,7 @@
 														data-name="Red sugar biscuit"
 														data-price="61.00"
 														data-image="/assets/img/product/p-45.jpg"
+														on:click|preventDefault={handleWishlistClick}
 													>
 														<span class="tooltip-text">Wishlist</span>
 														<span class="wishlist-icon"><i class="feather-heart"></i></span>
@@ -1106,6 +1381,7 @@
 														data-name="Red sugar biscuit"
 														data-price="61.00"
 														data-image="/assets/img/product/p-45.jpg"
+														on:click={handleAddToCart}
 													>
 														<span class="tooltip-text">Add to cart</span>
 														<span class="cart-icon"><i class="feather-shopping-bag"></i></span>

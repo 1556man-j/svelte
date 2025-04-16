@@ -1,7 +1,24 @@
 <script>
 	import { onMount } from 'svelte';
+	import QuickView from '../../components/Quickview.svelte';
 
+	let modalProduct = null;
+
+	function handleQuickView(event) {
+		const el = event.currentTarget;
+
+		modalProduct = {
+			id: el.getAttribute('data-id'),
+			name: el.getAttribute('data-name'),
+			price: el.getAttribute('data-price'),
+			image: el.getAttribute('data-image')
+			
+		};
+		console.log('Selected product:', modalProduct);
+
+	}
 	onMount(() => {
+
 		// Wait until DOM is ready before running the JS
 		const checkDOM = setInterval(() => {
 			const exists = document.querySelector('.product-title h2');
@@ -9,7 +26,6 @@
 				clearInterval(checkDOM);
 				window.loadProductData(); // Run the function from your external JS
 				sortProducts(sortBy);
-			
 			}
 		}, 100);
 
@@ -39,77 +55,130 @@
 		} else {
 			console.error("jQuery not found! Make sure it's loaded before initializing Owl Carousel.");
 		}
-
-		
 	});
 
 	// Initialize the selected sort value and view mode
 	let sortBy = 'manual';
-  let selectedSortLabel = 'Featured';
-  let gridView = 3; // 3 for grid view, 1 for list view
+	let selectedSortLabel = 'Featured';
+	let gridView = 3; // 3 for grid view, 1 for list view
 
-  // Sort options map
-  const criteriaMap = {
-    'Featured': 'manual',
-    'Best Selling': 'best-selling',
-    'Alphabetically, A-Z': 'title-ascending',
-    'Alphabetically, Z-A': 'title-descending',
-    'Price, low to high': 'price-ascending',
-    'Price, high to low': 'price-descending',
-  };
+	// Sort options map
+	const criteriaMap = {
+		Featured: 'manual',
+		'Best Selling': 'best-selling',
+		'Alphabetically, A-Z': 'title-ascending',
+		'Alphabetically, Z-A': 'title-descending',
+		'Price, low to high': 'price-ascending',
+		'Price, high to low': 'price-descending'
+	};
 
-  // Function to handle sorting changes
-  const handleSortChange = (value) => {
-    selectedSortLabel = Object.keys(criteriaMap).find(key => criteriaMap[key] === value);
-    sortProducts(value);
-  };
+	// Function to handle sorting changes
+	const handleSortChange = (value) => {
+		selectedSortLabel = Object.keys(criteriaMap).find((key) => criteriaMap[key] === value);
+		sortProducts(value);
+	};
 
-  // Function to handle sorting of the product list
-  const sortProducts = (option) => {
-    const productList = document.querySelectorAll('.st-col-item'); // Static products list
-    const productArray = Array.from(productList);
+	// Function to handle sorting of the product list
+	const sortProducts = (option) => {
+		const productList = document.querySelectorAll('.st-col-item'); // Static products list
+		const productArray = Array.from(productList);
 
-    if (option === 'price-ascending') {
-      productArray.sort((a, b) => {
-        const priceA = parseFloat(a.querySelector('.new-price').innerText.replace('€', ''));
-        const priceB = parseFloat(b.querySelector('.new-price').innerText.replace('€', ''));
-        return priceA - priceB;
-      });
-    } else if (option === 'price-descending') {
-      productArray.sort((a, b) => {
-        const priceA = parseFloat(a.querySelector('.new-price').innerText.replace('€', ''));
-        const priceB = parseFloat(b.querySelector('.new-price').innerText.replace('€', ''));
-        return priceB - priceA;
-      });
-    } else if (option === 'title-ascending') {
-      productArray.sort((a, b) => {
-        const nameA = a.querySelector('h6 a').innerText.toLowerCase();
-        const nameB = b.querySelector('h6 a').innerText.toLowerCase();
-        return nameA.localeCompare(nameB);
-      });
-    } else if (option === 'title-descending') {
-      productArray.sort((a, b) => {
-        const nameA = a.querySelector('h6 a').innerText.toLowerCase();
-        const nameB = b.querySelector('h6 a').innerText.toLowerCase();
-        return nameB.localeCompare(nameA);
-      });
-    }
+		if (option === 'price-ascending') {
+			productArray.sort((a, b) => {
+				const priceA = parseFloat(a.querySelector('.new-price').innerText.replace('€', ''));
+				const priceB = parseFloat(b.querySelector('.new-price').innerText.replace('€', ''));
+				return priceA - priceB;
+			});
+		} else if (option === 'price-descending') {
+			productArray.sort((a, b) => {
+				const priceA = parseFloat(a.querySelector('.new-price').innerText.replace('€', ''));
+				const priceB = parseFloat(b.querySelector('.new-price').innerText.replace('€', ''));
+				return priceB - priceA;
+			});
+		} else if (option === 'title-ascending') {
+			productArray.sort((a, b) => {
+				const nameA = a.querySelector('h6 a').innerText.toLowerCase();
+				const nameB = b.querySelector('h6 a').innerText.toLowerCase();
+				return nameA.localeCompare(nameB);
+			});
+		} else if (option === 'title-descending') {
+			productArray.sort((a, b) => {
+				const nameA = a.querySelector('h6 a').innerText.toLowerCase();
+				const nameB = b.querySelector('h6 a').innerText.toLowerCase();
+				return nameB.localeCompare(nameA);
+			});
+		}
 
-    // Reattach the sorted products to the container
-    const productContainer = document.getElementById('product-grid');
-    productArray.forEach(product => productContainer.appendChild(product));
-  };
+		// Reattach the sorted products to the container
+		const productContainer = document.getElementById('product-grid');
+		productArray.forEach((product) => productContainer.appendChild(product));
+	};
 
-  // Function to change the grid view (1 = list view, 3 = grid view)
-  const changeGridView = (viewMode) => {
-    gridView = viewMode;
-  };
-  //  Fix for desktop dropdown list sorting
-  const handleListClick = (label) => {
-    selectedSortLabel = label;
-    sortBy = criteriaMap[label];
-    handleSortChange(sortBy); // Triggers sorting
-  };
+	// Function to change the grid view (1 = list view, 3 = grid view)
+	const changeGridView = (viewMode) => {
+		gridView = viewMode;
+	};
+	//  Fix for desktop dropdown list sorting
+	const handleListClick = (label) => {
+		selectedSortLabel = label;
+		sortBy = criteriaMap[label];
+		handleSortChange(sortBy); // Triggers sorting
+	};
+
+	function handleAddToCart(event) {
+		event.preventDefault();
+
+		const target = event.currentTarget;
+
+		const product = {
+			id: target.dataset.id,
+			name: target.dataset.name,
+			price: parseFloat(target.dataset.price),
+			image: target.dataset.image,
+			quantity: 1
+		};
+
+		let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+		const existing = cart.find((p) => p.id === product.id);
+		if (existing) {
+			existing.quantity += 1;
+		} else {
+			cart.push(product);
+		}
+
+		localStorage.setItem('cart', JSON.stringify(cart));
+		console.log('Cart updated:', cart); // Debugging log ✅
+
+		// Dispatch custom event
+		window.dispatchEvent(new CustomEvent('cartUpdated'));
+
+		// Open mini-cart sidebar
+		document.querySelector('.mini-cart')?.classList.add('active');
+	}
+
+	function handleWishlistClick(event) {
+		const btn = event.currentTarget;
+		const id = btn.dataset.id;
+		const name = btn.dataset.name;
+		const price = btn.dataset.price;
+		const image = btn.dataset.image;
+
+		let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+
+		const exists = wishlist.some((item) => item.id === id);
+
+		if (exists) {
+			alert('Item already in wishlist!');
+		} else {
+			wishlist.push({ id, name, price, image });
+			localStorage.setItem('wishlist', JSON.stringify(wishlist));
+			alert('Added to wishlist!');
+
+			// Dispatch custom event to notify other components
+			window.dispatchEvent(new CustomEvent('wishlistUpdated'));
+		}
+	}
 </script>
 
 <!-- main section start-->
@@ -231,7 +300,11 @@
 								<div class="shop-grid">
 									<div id="ProductGridContainer">
 										<div class="product-grid-view">
-											<div class="shop-product-wrap collection grid-3 {gridView === 3 ? 'grid-3' : 'grid-1'}">
+											<div
+												class="shop-product-wrap collection grid-3 {gridView === 3
+													? 'grid-3'
+													: 'grid-1'}"
+											>
 												<div class="row">
 													<div class="col">
 														<ul class="product-view" id="product-grid">
@@ -260,6 +333,7 @@
 																				data-name="Candy nut chocolate"
 																				data-price="11.00"
 																				data-image="/assets/img/product/p-1.jpg"
+																				on:click|preventDefault={handleWishlistClick}
 																			>
 																				<span class="tooltip-text">Wishlist</span>
 																				<span class="wishlist-icon"
@@ -273,6 +347,7 @@
 																				data-name="Candy nut chocolate"
 																				data-price="11.00"
 																				data-image="/assets/img/product/p-1.jpg"
+																				on:click={handleAddToCart}
 																			>
 																				<span class="tooltip-text">Add to cart</span>
 																				<span class="cart-icon"
@@ -288,6 +363,7 @@
 																				data-name="Candy nut chocolate"
 																				data-price="11.00"
 																				data-image="/assets/img/product/p-1.jpg"
+																				on:click={handleQuickView}
 																			>
 																				<span class="tooltip-text">Quick view</span>
 																				<span class="quickview-icon"
@@ -339,6 +415,7 @@
 																				data-name="Candy nut chocolate"
 																				data-price="11.00"
 																				data-image="/assets/img/product/p-1.jpg"
+																				on:click|preventDefault={handleWishlistClick}
 																			>
 																				<span class="tooltip-text">Wishlist</span>
 																				<span class="wishlist-icon"
@@ -352,6 +429,7 @@
 																				data-name="Candy nut chocolate"
 																				data-price="11.00"
 																				data-image="/assets/img/product/p-1.jpg"
+																				on:click={handleAddToCart}
 																			>
 																				<span class="tooltip-text">Add to cart</span>
 																				<span class="cart-icon"
@@ -367,6 +445,7 @@
 																				data-name="Candy nut chocolate"
 																				data-price="11.00"
 																				data-image="/assets/img/product/p-1.jpg"
+																				on:click={handleQuickView}
 																			>
 																				<span class="tooltip-text">Quick view</span>
 																				<span class="quickview-icon"
@@ -409,6 +488,7 @@
 																				data-name="A bakery doughnuts"
 																				data-price="21.00"
 																				data-image="/assets/img/product/p-27.jpg"
+																				on:click|preventDefault={handleWishlistClick}
 																			>
 																				<span class="tooltip-text">Wishlist</span>
 																				<span class="wishlist-icon"
@@ -422,6 +502,7 @@
 																				data-name="A bakery doughnuts"
 																				data-price="21.00"
 																				data-image="/assets/img/product/p-27.jpg"
+																				on:click={handleAddToCart}
 																			>
 																				<span class="tooltip-text">Add to cart</span>
 																				<span class="cart-icon"
@@ -437,6 +518,7 @@
 																				data-name="A bakery doughnuts"
 																				data-price="21.00"
 																				data-image="/assets/img/product/p-27.jpg"
+																				on:click={handleQuickView}
 																			>
 																				<span class="tooltip-text">Quick view</span>
 																				<span class="quickview-icon"
@@ -488,6 +570,7 @@
 																				data-name="A bakery doughnuts"
 																				data-price="21.00"
 																				data-image="/assets/img/product/p-27.jpg"
+																				on:click|preventDefault={handleWishlistClick}
 																			>
 																				<span class="tooltip-text">Wishlist</span>
 																				<span class="wishlist-icon"
@@ -501,6 +584,7 @@
 																				data-name="A bakery doughnuts"
 																				data-price="21.00"
 																				data-image="/assets/img/product/p-27.jpg"
+																				on:click={handleAddToCart}
 																			>
 																				<span class="tooltip-text">Add to cart</span>
 																				<span class="cart-icon"
@@ -516,6 +600,7 @@
 																				data-name="A bakery doughnuts"
 																				data-price="21.00"
 																				data-image="/assets/img/product/p-27.jpg"
+																				on:click={handleQuickView}
 																			>
 																				<span class="tooltip-text">Quick view</span>
 																				<span class="quickview-icon"
@@ -558,6 +643,7 @@
 																				data-name="Fresh bread toast"
 																				data-price="24.00"
 																				data-image="/assets/img/product/p-29.jpg"
+																				on:click|preventDefault={handleWishlistClick}
 																			>
 																				<span class="tooltip-text">Wishlist</span>
 																				<span class="wishlist-icon"
@@ -571,6 +657,7 @@
 																				data-name="Fresh bread toast"
 																				data-price="24.00"
 																				data-image="/assets/img/product/p-29.jpg"
+																				on:click={handleAddToCart}
 																			>
 																				<span class="tooltip-text">Add to cart</span>
 																				<span class="cart-icon"
@@ -586,6 +673,7 @@
 																				data-name="Fresh bread toast"
 																				data-price="24.00"
 																				data-image="/assets/img/product/p-29.jpg"
+																				on:click={handleQuickView}
 																			>
 																				<span class="tooltip-text">Quick view</span>
 																				<span class="quickview-icon"
@@ -637,6 +725,7 @@
 																				data-name="Fresh bread toast"
 																				data-price="24.00"
 																				data-image="/assets/img/product/p-29.jpg"
+																				on:click|preventDefault={handleWishlistClick}
 																			>
 																				<span class="tooltip-text">Wishlist</span>
 																				<span class="wishlist-icon"
@@ -650,6 +739,7 @@
 																				data-name="Fresh bread toast"
 																				data-price="24.00"
 																				data-image="/assets/img/product/p-29.jpg"
+																				on:click={handleAddToCart}
 																			>
 																				<span class="tooltip-text">Add to cart</span>
 																				<span class="cart-icon"
@@ -707,6 +797,7 @@
 																				data-name="Free sugar toast"
 																				data-price="25.00"
 																				data-image="/assets/img/product/p-31.jpg"
+																				on:click|preventDefault={handleWishlistClick}
 																			>
 																				<span class="tooltip-text">Wishlist</span>
 																				<span class="wishlist-icon"
@@ -720,6 +811,7 @@
 																				data-name="Free sugar toast"
 																				data-price="25.00"
 																				data-image="/assets/img/product/p-31.jpg"
+																				on:click={handleAddToCart}
 																			>
 																				<span class="tooltip-text">Add to cart</span>
 																				<span class="cart-icon"
@@ -735,6 +827,7 @@
 																				data-name="Free sugar toast"
 																				data-price="25.00"
 																				data-image="/assets/img/product/p-31.jpg"
+																				on:click={handleQuickView}
 																			>
 																				<span class="tooltip-text">Quick view</span>
 																				<span class="quickview-icon"
@@ -786,6 +879,7 @@
 																				data-name="Free sugar toast"
 																				data-price="25.00"
 																				data-image="/assets/img/product/p-31.jpg"
+																				on:click|preventDefault={handleWishlistClick}
 																			>
 																				<span class="tooltip-text">Wishlist</span>
 																				<span class="wishlist-icon"
@@ -799,6 +893,7 @@
 																				data-name="Free sugar toast"
 																				data-price="25.00"
 																				data-image="/assets/img/product/p-31.jpg"
+																				on:click={handleAddToCart}
 																			>
 																				<span class="tooltip-text">Add to cart</span>
 																				<span class="cart-icon"
@@ -814,6 +909,7 @@
 																				data-name="Free sugar toast"
 																				data-price="25.00"
 																				data-image="/assets/img/product/p-31.jpg"
+																				on:click={handleQuickView}
 																			>
 																				<span class="tooltip-text">Quick view</span>
 																				<span class="quickview-icon"
@@ -856,6 +952,7 @@
 																				data-name="Jamun fruit pastry"
 																				data-price="25.00"
 																				data-image="/assets/img/product/p-34.jpg"
+																				on:click|preventDefault={handleWishlistClick}
 																			>
 																				<span class="tooltip-text">Wishlist</span>
 																				<span class="wishlist-icon"
@@ -869,6 +966,7 @@
 																				data-name="Jamun fruit pastry"
 																				data-price="25.00"
 																				data-image="/assets/img/product/p-34.jpg"
+																				on:click={handleAddToCart}
 																			>
 																				<span class="tooltip-text">Add to cart</span>
 																				<span class="cart-icon"
@@ -884,6 +982,7 @@
 																				data-name="Jamun fruit pastry"
 																				data-price="25.00"
 																				data-image="/assets/img/product/p-34.jpg"
+																				on:click={handleQuickView}
 																			>
 																				<span class="tooltip-text">Quick view</span>
 																				<span class="quickview-icon"
@@ -935,6 +1034,7 @@
 																				data-name="Jamun fruit pastry"
 																				data-price="25.00"
 																				data-image="/assets/img/product/p-34.jpg"
+																				on:click|preventDefault={handleWishlistClick}
 																			>
 																				<span class="tooltip-text">Wishlist</span>
 																				<span class="wishlist-icon"
@@ -948,6 +1048,7 @@
 																				data-name="Jamun fruit pastry"
 																				data-price="25.00"
 																				data-image="/assets/img/product/p-34.jpg"
+																				on:click={handleAddToCart}
 																			>
 																				<span class="tooltip-text">Add to cart</span>
 																				<span class="cart-icon"
@@ -963,6 +1064,7 @@
 																				data-name="Jamun fruit pastry"
 																				data-price="25.00"
 																				data-image="/assets/img/product/p-34.jpg"
+																				on:click={handleQuickView}
 																			>
 																				<span class="tooltip-text">Quick view</span>
 																				<span class="quickview-icon"
@@ -1005,6 +1107,7 @@
 																				data-name="The bread a fresh"
 																				data-price="25.00"
 																				data-image="/assets/img/product/p-35.jpg"
+																				on:click|preventDefault={handleWishlistClick}
 																			>
 																				<span class="tooltip-text">Wishlist</span>
 																				<span class="wishlist-icon"
@@ -1018,6 +1121,7 @@
 																				data-name="The bread a fresh"
 																				data-price="25.00"
 																				data-image="/assets/img/product/p-35.jpg"
+																				on:click={handleAddToCart}
 																			>
 																				<span class="tooltip-text">Add to cart</span>
 																				<span class="cart-icon"
@@ -1033,6 +1137,7 @@
 																				data-name="The bread a fresh"
 																				data-price="25.00"
 																				data-image="/assets/img/product/p-35.jpg"
+																				on:click={handleQuickView}
 																			>
 																				<span class="tooltip-text">Quick view</span>
 																				<span class="quickview-icon"
@@ -1084,6 +1189,7 @@
 																				data-name="The bread a fresh"
 																				data-price="25.00"
 																				data-image="/assets/img/product/p-35.jpg"
+																				on:click|preventDefault={handleWishlistClick}
 																			>
 																				<span class="tooltip-text">Wishlist</span>
 																				<span class="wishlist-icon"
@@ -1097,6 +1203,7 @@
 																				data-name="The bread a fresh"
 																				data-price="25.00"
 																				data-image="/assets/img/product/p-35.jpg"
+																				on:click={handleAddToCart}
 																			>
 																				<span class="tooltip-text">Add to cart</span>
 																				<span class="cart-icon"
@@ -1112,6 +1219,7 @@
 																				data-name="The bread a fresh"
 																				data-price="25.00"
 																				data-image="/assets/img/product/p-35.jpg"
+																				on:click={handleQuickView}
 																			>
 																				<span class="tooltip-text">Quick view</span>
 																				<span class="quickview-icon"
@@ -1154,6 +1262,7 @@
 																				data-name="Sandwich olka bread"
 																				data-price="31.00"
 																				data-image="/assets/img/product/p-37.jpg"
+																				on:click|preventDefault={handleWishlistClick}
 																			>
 																				<span class="tooltip-text">Wishlist</span>
 																				<span class="wishlist-icon"
@@ -1167,6 +1276,7 @@
 																				data-name="Sandwich olka bread"
 																				data-price="31.00"
 																				data-image="/assets/img/product/p-37.jpg"
+																				on:click={handleAddToCart}
 																			>
 																				<span class="tooltip-text">Add to cart</span>
 																				<span class="cart-icon"
@@ -1182,6 +1292,7 @@
 																				data-name="Sandwich olka bread"
 																				data-price="31.00"
 																				data-image="/assets/img/product/p-37.jpg"
+																				on:click={handleQuickView}
 																			>
 																				<span class="tooltip-text">Quick view</span>
 																				<span class="quickview-icon"
@@ -1233,6 +1344,7 @@
 																				data-name="Sandwich olka bread"
 																				data-price="31.00"
 																				data-image="/assets/img/product/p-37.jpg"
+																				on:click|preventDefault={handleWishlistClick}
 																			>
 																				<span class="tooltip-text">Wishlist</span>
 																				<span class="wishlist-icon"
@@ -1246,6 +1358,7 @@
 																				data-name="Sandwich olka bread"
 																				data-price="31.00"
 																				data-image="/assets/img/product/p-37.jpg"
+																				on:click={handleAddToCart}
 																			>
 																				<span class="tooltip-text">Add to cart</span>
 																				<span class="cart-icon"
@@ -1261,6 +1374,7 @@
 																				data-name="Sandwich olka bread"
 																				data-price="31.00"
 																				data-image="/assets/img/product/p-37.jpg"
+																				on:click={handleQuickView}
 																			>
 																				<span class="tooltip-text">Quick view</span>
 																				<span class="quickview-icon"
@@ -1303,6 +1417,7 @@
 																				data-name="Healthy cake pastry"
 																				data-price="44.00"
 																				data-image="/assets/img/product/p-39.jpg"
+																				on:click|preventDefault={handleWishlistClick}
 																			>
 																				<span class="tooltip-text">Wishlist</span>
 																				<span class="wishlist-icon"
@@ -1316,6 +1431,7 @@
 																				data-name="Healthy cake pastry"
 																				data-price="44.00"
 																				data-image="/assets/img/product/p-39.jpg"
+																				on:click={handleAddToCart}
 																			>
 																				<span class="tooltip-text">Add to cart</span>
 																				<span class="cart-icon"
@@ -1331,6 +1447,7 @@
 																				data-name="Healthy cake pastry"
 																				data-price="44.00"
 																				data-image="/assets/img/product/p-39.jpg"
+																				on:click={handleQuickView}
 																			>
 																				<span class="tooltip-text">Quick view</span>
 																				<span class="quickview-icon"
@@ -1374,6 +1491,7 @@
 																				data-name="Healthy cake pastry"
 																				data-price="44.00"
 																				data-image="/assets/img/product/p-39.jpg"
+																				on:click|preventDefault={handleWishlistClick}
 																			>
 																				<span class="tooltip-text">Wishlist</span>
 																				<span class="wishlist-icon"
@@ -1387,6 +1505,7 @@
 																				data-name="Healthy cake pastry"
 																				data-price="44.00"
 																				data-image="/assets/img/product/p-39.jpg"
+																				on:click={handleAddToCart}
 																			>
 																				<span class="tooltip-text">Add to cart</span>
 																				<span class="cart-icon"
@@ -1402,6 +1521,7 @@
 																				data-name="Healthy cake pastry"
 																				data-price="44.00"
 																				data-image="/assets/img/product/p-39.jpg"
+																				on:click={handleQuickView}
 																			>
 																				<span class="tooltip-text">Quick view</span>
 																				<span class="quickview-icon"
@@ -1444,6 +1564,7 @@
 																				data-name="Creamy for rasmalai"
 																				data-price="54.00"
 																				data-image="/assets/img/product/p-41.jpg"
+																				on:click|preventDefault={handleWishlistClick}
 																			>
 																				<span class="tooltip-text">Wishlist</span>
 																				<span class="wishlist-icon"
@@ -1457,6 +1578,7 @@
 																				data-name="Creamy for rasmalai"
 																				data-price="54.00"
 																				data-image="/assets/img/product/p-41.jpg"
+																				on:click={handleAddToCart}
 																			>
 																				<span class="tooltip-text">Add to cart</span>
 																				<span class="cart-icon"
@@ -1472,6 +1594,7 @@
 																				data-name="Creamy for rasmalai"
 																				data-price="54.00"
 																				data-image="/assets/img/product/p-41.jpg"
+																				on:click={handleQuickView}
 																			>
 																				<span class="tooltip-text">Quick view</span>
 																				<span class="quickview-icon"
@@ -1523,6 +1646,7 @@
 																				data-name="Creamy for rasmalai"
 																				data-price="54.00"
 																				data-image="/assets/img/product/p-41.jpg"
+																				on:click|preventDefault={handleWishlistClick}
 																			>
 																				<span class="tooltip-text">Wishlist</span>
 																				<span class="wishlist-icon"
@@ -1536,6 +1660,7 @@
 																				data-name="Creamy for rasmalai"
 																				data-price="54.00"
 																				data-image="/assets/img/product/p-41.jpg"
+																				on:click={handleAddToCart}
 																			>
 																				<span class="tooltip-text">Add to cart</span>
 																				<span class="cart-icon"
@@ -1551,6 +1676,7 @@
 																				data-name="Creamy for rasmalai"
 																				data-price="54.00"
 																				data-image="/assets/img/product/p-41.jpg"
+																				on:click={handleQuickView}
 																			>
 																				<span class="tooltip-text">Quick view</span>
 																				<span class="quickview-icon"
@@ -1593,6 +1719,7 @@
 																				data-name="Crackers for rasmalai"
 																				data-price="61.00"
 																				data-image="/assets/img/product/p-43.jpg"
+																				on:click|preventDefault={handleWishlistClick}
 																			>
 																				<span class="tooltip-text">Wishlist</span>
 																				<span class="wishlist-icon"
@@ -1606,6 +1733,7 @@
 																				data-name="Crackers for rasmalai"
 																				data-price="61.00"
 																				data-image="/assets/img/product/p-43.jpg"
+																				on:click={handleAddToCart}
 																			>
 																				<span class="tooltip-text">Add to cart</span>
 																				<span class="cart-icon"
@@ -1621,6 +1749,7 @@
 																				data-name="Crackers for rasmalai"
 																				data-price="61.00"
 																				data-image="/assets/img/product/p-43.jpg"
+																				on:click={handleQuickView}
 																			>
 																				<span class="tooltip-text">Quick view</span>
 																				<span class="quickview-icon"
@@ -1671,6 +1800,7 @@
 																				data-name="Crackers for rasmalai"
 																				data-price="61.00"
 																				data-image="/assets/img/product/p-43.jpg"
+																				on:click|preventDefault={handleWishlistClick}
 																			>
 																				<span class="tooltip-text">Wishlist</span>
 																				<span class="wishlist-icon"
@@ -1684,6 +1814,7 @@
 																				data-name="Crackers for rasmalai"
 																				data-price="61.00"
 																				data-image="/assets/img/product/p-43.jpg"
+																				on:click={handleAddToCart}
 																			>
 																				<span class="tooltip-text">Add to cart</span>
 																				<span class="cart-icon"
@@ -1699,6 +1830,7 @@
 																				data-name="Crackers for rasmalai"
 																				data-price="61.00"
 																				data-image="/assets/img/product/p-43.jpg"
+																				on:click={handleQuickView}
 																			>
 																				<span class="tooltip-text">Quick view</span>
 																				<span class="quickview-icon"
@@ -1738,13 +1870,22 @@
 																				data-name="Red sugar biscuit"
 																				data-price="61.00"
 																				data-image="/assets/img/product/p-45.jpg"
+																				on:click|preventDefault={handleWishlistClick}
 																			>
 																				<span class="tooltip-text">Wishlist</span>
 																				<span class="wishlist-icon"
 																					><i class="feather-heart"></i></span
 																				>
 																			</a>
-																			<a href="javascript:void(0)" class="add-to-cart">
+																			<a
+																				href="javascript:void(0)"
+																				class="add-to-cart"
+																				data-id="11"
+																				data-name="Red sugar biscuit"
+																				data-price="61.00"
+																				data-image="/assets/img/product/p-45.jpg"
+																				on:click={handleAddToCart}
+																			>
 																				<span class="tooltip-text">Add to cart</span>
 																				<span class="cart-icon"
 																					><i class="feather-shopping-bag"></i></span
@@ -1759,6 +1900,7 @@
 																				data-name="Red sugar biscuit"
 																				data-price="61.00"
 																				data-image="/assets/img/product/p-45.jpg"
+																				on:click={handleQuickView}
 																			>
 																				<span class="tooltip-text">Quick view</span>
 																				<span class="quickview-icon"
@@ -1802,6 +1944,7 @@
 																				data-name="Red sugar biscuit"
 																				data-price="61.00"
 																				data-image="/assets/img/product/p-45.jpg"
+																				on:click|preventDefault={handleWishlistClick}
 																			>
 																				<span class="tooltip-text">Wishlist</span>
 																				<span class="wishlist-icon"
@@ -1815,6 +1958,7 @@
 																				data-name="Red sugar biscuit"
 																				data-price="61.00"
 																				data-image="/assets/img/product/p-45.jpg"
+																				on:click={handleAddToCart}
 																			>
 																				<span class="tooltip-text">Add to cart</span>
 																				<span class="cart-icon"
@@ -1830,6 +1974,7 @@
 																				data-name="Red sugar biscuit"
 																				data-price="61.00"
 																				data-image="/assets/img/product/p-45.jpg"
+																				on:click={handleQuickView}
 																			>
 																				<span class="tooltip-text">Quick view</span>
 																				<span class="quickview-icon"
@@ -1872,6 +2017,7 @@
 																				data-name="Fresh healthy doughnuts"
 																				data-price="69.00"
 																				data-image="/assets/img/product/p-47.jpg"
+																				on:click|preventDefault={handleWishlistClick}
 																			>
 																				<span class="tooltip-text">Wishlist</span>
 																				<span class="wishlist-icon"
@@ -1885,6 +2031,7 @@
 																				data-name="Fresh healthy doughnuts"
 																				data-price="69.00"
 																				data-image="/assets/img/product/p-47.jpg"
+																				on:click={handleAddToCart}
 																			>
 																				<span class="tooltip-text">Add to cart</span>
 																				<span class="cart-icon"
@@ -1900,6 +2047,7 @@
 																				data-name="Fresh healthy doughnuts"
 																				data-price="69.00"
 																				data-image="/assets/img/product/p-47.jpg"
+																				on:click={handleQuickView}
 																			>
 																				<span class="tooltip-text">Quick view</span>
 																				<span class="quickview-icon"
@@ -1951,6 +2099,7 @@
 																				data-name="Fresh healthy doughnuts"
 																				data-price="69.00"
 																				data-image="/assets/img/product/p-47.jpg"
+																				on:click|preventDefault={handleWishlistClick}
 																			>
 																				<span class="tooltip-text">Wishlist</span>
 																				<span class="wishlist-icon"
@@ -1964,6 +2113,7 @@
 																				data-name="Fresh healthy doughnuts"
 																				data-price="69.00"
 																				data-image="/assets/img/product/p-47.jpg"
+																				on:click={handleAddToCart}
 																			>
 																				<span class="tooltip-text">Add to cart</span>
 																				<span class="cart-icon"
@@ -1979,6 +2129,7 @@
 																				data-name="Fresh healthy doughnuts"
 																				data-price="69.00"
 																				data-image="/assets/img/product/p-47.jpg"
+																				on:click={handleQuickView}
 																			>
 																				<span class="tooltip-text">Quick view</span>
 																				<span class="quickview-icon"
@@ -1991,6 +2142,7 @@
 																	<!-- product-content end -->
 																</div>
 															</li>
+															<QuickView {modalProduct}/>
 														</ul>
 													</div>
 												</div>
@@ -2067,4 +2219,4 @@
 		</div>
 	</section>
 </main>
-<!-- main section end--> 
+<!-- main section end-->
