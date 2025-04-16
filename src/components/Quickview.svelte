@@ -1,26 +1,25 @@
 <script>
 	import { onMount } from 'svelte';
 	export let modalProduct;
-  
+
 	let cart = [];
 	function loadCart() {
 		const storedCart = localStorage.getItem('cart');
-    cart = storedCart ? JSON.parse(storedCart) : [];
-    console.log('Loaded Cart:', cart);
+		cart = storedCart ? JSON.parse(storedCart) : [];
+		console.log('Loaded Cart:', cart);
 	}
 
 	function addToCart() {
-		
-		if (!modalProduct){
+		if (!modalProduct) {
 			console.error('No product available to add');
 			return;
-		} 
+		}
 		loadCart();
 
 		if (!cart) {
-      console.error('Cart is not initialized.');
-      return;
-    }
+			console.error('Cart is not initialized.');
+			return;
+		}
 
 		const existing = cart.find((item) => item.id === modalProduct.id);
 		if (existing) {
@@ -30,16 +29,15 @@
 		}
 		localStorage.setItem('cart', JSON.stringify(cart));
 
-
 		window.dispatchEvent(
 			new CustomEvent('cartUpdated', {
 				detail: { cart }
 			})
 		);
-		
+
 		closeQuickView();
 	}
-	
+
 	function closeQuickView() {
 		const modalEl = document.getElementById('quickview');
 		const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
@@ -50,9 +48,9 @@
 		loadCart();
 
 		window.addEventListener('cartUpdated', (e) => {
-      cart = e.detail.cart;
-      console.log('Cart Updated:', cart); // Debugging cart updates
-    });
+			cart = e.detail.cart;
+			console.log('Cart Updated:', cart); // Debugging cart updates
+		});
 	});
 </script>
 
@@ -80,7 +78,11 @@
 								<div class="swiper-wrapper">
 									<div class="swiper-slide">
 										<a href="#">
-											<img src={modalProduct?.image} class="img-fluid modal-image" alt={modalProduct?.name} />
+											<img
+												src={modalProduct?.image}
+												class="img-fluid modal-image"
+												alt={modalProduct?.name}
+											/>
 										</a>
 									</div>
 								</div>
@@ -108,11 +110,13 @@
 									incididunt ut labore et dolore magna aliqua.
 								</p>
 							</div>
-							<div class="quickview-buttons">
-								<button type="button" class="addtocartqv" on:click={addToCart}>
-									<span class="cart-title add-to-cart">Add to cart</span>
-								</button>
-							</div>
+							<form method="post">
+								<div class="quickview-buttons">
+									<button type="button" class="addtocartqv" on:click={addToCart}>
+										<span class="cart-title add-to-cart">Add to cart</span>
+									</button>
+								</div>
+							</form>
 						</div>
 					</div>
 				</div>
